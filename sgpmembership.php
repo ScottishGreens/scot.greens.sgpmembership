@@ -1,6 +1,6 @@
 <?php
 
-require_once 'membership.civix.php';
+require_once 'sgpmembership.civix.php';
 
 function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
   if($objectType=='contact') {
