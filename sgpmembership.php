@@ -6,7 +6,7 @@ function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
   if($objectType=='contact') {
     array_push($tasks, array(
       'title' => "SGP - Set Membership Fields", 
-      'class' => "CRM_Contact_Form_Task_SetMembershipFlag", 
+      'class' => "CRM_Contact_Form_Task_SetMembershipFields", 
     ));
   }
   if($objectType=='contribution') {
@@ -27,7 +27,7 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
     $membership = array();
     $membership['membership_id'] =  $id;
     $custom_fields = CRM_Utils_SGP_MembershipCustomFields::getCustomFields();
-    $mf = new CRM_Utils_SGP_SetMembershipFlag(
+    $mf = new CRM_Utils_SGP_SetMembershipFields(
       array_merge($membership,
         array(
           'custom_fields' => $custom_fields,

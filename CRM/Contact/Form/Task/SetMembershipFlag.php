@@ -1,7 +1,7 @@
 <?php
 /*
  */
-class CRM_Contact_Form_Task_SetMembershipFlag extends CRM_Contact_Form_Task {
+class CRM_Contact_Form_Task_SetMembershipFields extends CRM_Contact_Form_Task {
 
   /**
    * Build all the data structures needed to build the form.
@@ -25,7 +25,7 @@ class CRM_Contact_Form_Task_SetMembershipFlag extends CRM_Contact_Form_Task {
       if ($result['count'] > 0) {
         foreach ($result['values'] as $membership) {
           CRM_Core_Error::debug_log_message("Set Membership Fields for {$membership['id']}");
-          $ll = new CRM_Utils_SGP_SetMembershipFlag(
+          $ll = new CRM_Utils_SGP_SetMembershipFields(
             array(
               'membership_id' => $membership['id'],
             )
