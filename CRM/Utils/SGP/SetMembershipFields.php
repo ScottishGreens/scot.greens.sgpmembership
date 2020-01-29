@@ -36,8 +36,8 @@
 
       //CRM_Core_Error::debug_log_message("Processing Membership ID {$this->membership_id}");
 
-      if (empty($this->custom_fields['ward'])) {
-        $this->custom_fields = CRM_Utils_SGP_CustomFields::getCustomFields();
+      if (empty($this->custom_fields['membershippaymentmethod'])) {
+        $this->custom_fields = CRM_Utils_SGP_MembershipCustomFields::getCustomFields();
       } 
 
 

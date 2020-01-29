@@ -1,6 +1,6 @@
 <?php
 
-  class CRM_Utils_GreenMembership_RecurringContribution {
+  class CRM_Utils_SGP_RecurringContribution {
 
     var $contact_id = NULL;
     var $total_amount = NULL;
