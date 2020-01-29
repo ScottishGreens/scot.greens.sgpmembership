@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <extension key="scot.greens.membership" type="module">
-  <file>membership</file>
+  <file>sgpmembership</file>
   <name>SGP Membership Payments</name>
   <description>Processing SGP membership payments</description>
   <license>AGPL-3.0</license>
