@@ -55,7 +55,7 @@
         ),
         'api.Contact.get' => array(
           'sequential' => 1, 
-          'return' => "{$this->custom_fields['memberjoin']}, {$this->custom_fields['memberexpiry']}", 
+          'return' => "{$this->custom_fields['memberjoin']}, {$this->custom_fields['memberstatus']}, {$this->custom_fields['memberexpiry']}", 
           'id' => "\$value.contact_id"
         ),
       );
