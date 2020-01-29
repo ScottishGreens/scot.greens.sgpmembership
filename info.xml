@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<extension key="scot.greens.membership" type="module">
+<extension key="scot.greens.sgpmembership" type="module">
   <file>sgpmembership</file>
   <name>SGP Membership Payments</name>
   <description>Processing SGP membership payments</description>
