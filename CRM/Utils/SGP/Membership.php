@@ -37,8 +37,6 @@
 
             $this->latest_members_dues = $this->getLatestMembershipContribution($this->contact_id);
 
-            // Get Linked Membership
-
             if (isset($this->latest_members_dues['contribution_recur_id']) &&
                 is_numeric($this->latest_members_dues['contribution_recur_id'])) {
 
@@ -110,6 +108,7 @@
                 'sequential' => 1,
                 'contact_id' => $contact_id,
                 'financial_type_id' => "Member Dues",
+                'contribution_status_id' => ["Completed", "Pending"],
                 'options' => ['sort' => "receive_date DESC", 'limit' => 1],
             );
 

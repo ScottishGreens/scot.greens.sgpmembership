@@ -211,6 +211,7 @@
         $result = civicrm_api3('Contribution', 'get', array(
           'sequential' => 1,
           'return' => ['id','payment_instrument'],
+          'contribution_status_id' => ["Completed", "Pending"],
           'contact_id' => $contact_id,
           'financial_type_id' => "Member Dues",
           'options' => array('sort' => "receive_date DESC", 'limit' => 1),
