@@ -5,45 +5,55 @@ require_once 'sgpmembership.civix.php';
 function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
   if($objectType=='contact') {
     array_push($tasks, array(
-      'title' => "SGP - Set Membership Fields", 
-      'class' => "CRM_Contact_Form_Task_SetMembershipFields", 
+      'title' => "SGP - Update Membership", 
+      'class' => "CRM_Contact_Form_Task_UpdateMembership", 
     ));
   }
   if($objectType=='contribution') {
     array_push($tasks, array(
-      'title' => "SGP - Create Recurring Payments", 
-      'class' => "CRM_Contribute_Form_Task_CreateRecurringPayment", 
-    ));
-    array_push($tasks, array(
-      'title' => "SGP - Process Membership Payments", 
-      'class' => "CRM_Contribute_Form_Task_ProcessMembershipPayment", 
+      'title' => "SGP - Generate Recurring Payment", 
+      'class' => "CRM_Contribute_Form_Task_GenerateRecurringPayment", 
     ));
   }
   
 }
 
 function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
+
   if(($op == 'edit' || $op == 'create') && ($objectName=='Membership')) {
-    $membership = array();
-    $membership['membership_id'] =  $id;
-    $custom_fields = CRM_Utils_SGP_MembershipCustomFields::getCustomFields();
-    $mf = new CRM_Utils_SGP_SetMembershipFields(
-      array_merge($membership,
-        array(
-          'custom_fields' => $custom_fields,
-        )
+    
+    CRM_Core_Error::debug_log_message("Updating Membership Fields for {$params->contact_id}");
+    $smf = new CRM_Utils_SGP_SetMembershipFields(
+      array(
+        'contact_id' => $params->contact_id,
+        'debug' => true,
       )
     );
-    $res = $mf->run();
-  }
-}
+    $res[] = $smf->run();
 
-function sgpmembership_civicrm_pre($op, $objectName, $id, &$params) {
-  if(($op == 'create') && ($objectName=='Contribution')
-    && $params['financial_type_id'] == 2) {
-    $pp = new CRM_Utils_SGP_RecurringContribution($params);
-    $res = $pp->processRC();
   }
+
+  if(($op == 'create') && ($objectName=='Contribution')
+    && $params->financial_type_id == 2) {
+
+    CRM_Core_Error::debug_log_message("Generate Recurring Payment for Contribution: {$id}");
+    $rc = new CRM_Utils_SGP_RecurringContribution(array(
+      'contribution_id' => $id,
+    ));
+    $res[] = $rc->generate();
+
+    CRM_Core_Error::debug_log_message("Updating Membership for Contact: {$params->contact_id}");
+    $m = new CRM_Utils_SGP_Membership(
+      array(
+        'contact_id' => $params->contact_id,
+        'debug' => true,
+      )
+    );
+    $res = $m->updateMembership();
+
+  }
+
+
 }
 
 
