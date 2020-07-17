@@ -57,17 +57,19 @@
 
           // GET ALL MEMBERSHIPS
 
-          $this->membership = $this->getLastMembership($this->contact_id);
 
-          if (isset($this->membership['id']) &&
-              is_numeric($this->membership['id'])) {
+          $this->first_membership = $this->getLastMembership($this->contact_id);
+          $this->last_membership = $this->getLastMembership($this->contact_id);
+
+          if (isset($this->last_membership['id']) &&
+              is_numeric($this->last_membership['id'])) {
 
             $is_member = 0;
 
-            switch ($this->membership['status_id.name']) {
+            switch ($this->last_membership['status_id.name']) {
 
                case 'Pending':
-                $this->membership['status_id.name'] = 'New';
+                $this->last_membership['status_id.name'] = 'New';
                case 'New':
                case 'Current':
                case 'Grace - Pending':
@@ -96,10 +98,13 @@
                 $update_params[$this->custom_fields['memberexpiry']] = NULL;
               }
               else {
-                $update_params[$this->custom_fields['memberexpiry']] = $this->membership['end_date'];
+                $update_params[$this->custom_fields['memberexpiry']] = $this->last_membership['end_date'];
               }
 
             } 
+
+            if (isset($this->custom_fields['memberjoin']))
+              $update_params[$this->custom_fields['memberjoin']] = $this->first_membership['start_date'];
 
             if (isset($this->custom_fields['memberactive']))
               $update_params[$this->custom_fields['memberactive']] = $is_member;
@@ -108,7 +113,7 @@
               $update_params[$this->custom_fields['membershippaymentmethod']] = $this->membership_payment_method;
 
             if (isset($this->custom_fields['memberstatus']))
-              $update_params[$this->custom_fields['memberstatus']] = $this->membership['status_id.name'];
+              $update_params[$this->custom_fields['memberstatus']] = $this->last_membership['status_id.name'];
 
             try {
               if ($this->debug) CRM_Core_Error::debug_var("Setting Membership fields",$update_params);
@@ -127,11 +132,63 @@
 
           if ($this->debug) CRM_Core_Error::debug_log_message("No Members Dues payment for Contact: {$this->contact_id}");
 
+          $update_params = array(
+            'sequential' => 1,
+            'id' => $this->contact_id,
+          );
+
+          $update_params[$this->custom_fields['memberexpiry']] = NULL;
+          $update_params[$this->custom_fields['memberjoin']] = NULL;
+          $update_params[$this->custom_fields['memberactive']] = 0;
+          $update_params[$this->custom_fields['membershippaymentmethod']] = NULL;
+          $update_params[$this->custom_fields['memberstatus']] = NULL;
+
+          try {
+            if ($this->debug) CRM_Core_Error::debug_var("Setting Membership fields",$update_params);
+            $result = civicrm_api3('Contact', 'create', $update_params);
+
+          }
+          catch (CiviCRM_API3_Exception $e) {
+            CRM_Core_Error::debug_var("Error: ",$e);
+          }
+
         }
 
       }
 
   }
+
+  function getFirstMembership($contact_id) {
+
+    if (isset($contact_id) &&
+        is_numeric($contact_id)) {
+
+      if ($this->debug) CRM_Core_Error::debug_log_message("Getting First Membership for {$this->contact_id}");
+
+      
+      // Get Payment Method
+      try {
+        $result = civicrm_api3('Membership', 'get', array(
+          'sequential' => 1,
+          'return' => ["status_id.name", "end_date", "start_date"],
+          'contact_id' => $contact_id,
+          'financial_type_id' => "Member Dues",
+          'options' => array('sort' => "end_date DESC", 'limit' => 1),
+        ));
+      }
+      catch (CiviCRM_API3_Exception $e) {
+        CRM_Core_Error::debug_var("Error: ",$e);
+      }
+
+      if ($this->debug) CRM_Core_Error::debug_var("First Membership: ", $result);
+
+      if ($result['count'] > 0) return $result['values'][0];
+      else return false;
+
+    }
+
+  }
+
 
   function getLastMembership($contact_id) {
 
