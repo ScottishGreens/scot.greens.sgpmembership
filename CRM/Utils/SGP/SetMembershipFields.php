@@ -41,28 +41,31 @@
           is_numeric($this->contact_id)) {
 
         $this->custom_fields = $this->getCustomFields();
+
+        $update_params = array(
+          'sequential' => 1,
+          'id' => $this->contact_id,
+        );
+        $update_params[$this->custom_fields['memberexpiry']] = '';
+        $update_params[$this->custom_fields['memberjoin']] = '';
+        $update_params[$this->custom_fields['memberactive']] = 0;
+        $update_params[$this->custom_fields['membershippaymentmethod']] = '';
+        $update_params[$this->custom_fields['memberstatus']] = '';
+
+
         $this->membership_optionvalues = $this->getMembershipStatuses();
 
-        // GET LAST MEMBER DUES PAYMENT
+        // GET FIRST MEMBERSHIP FOR START DATE
+        $this->first_membership = $this->getFirstMembership($this->contact_id);
 
-        $this->membership_payment_method = $this->getMembershipPaymentMethod($this->contact_id);
+        if (is_numeric($this->first_membership['id']))
+          $update_params[$this->custom_fields['memberjoin']] = $this->first_membership['start_date'];
 
-        if (isset($this->membership_payment_method) &&
-              $this->membership_payment_method !== FALSE ) {
+        // GET LAST MEMBERSHIP FOR STATUS AND END DATE
+        $this->last_membership = $this->getLastMembership($this->contact_id);
 
-          // IF WE HAVE A MEMBERS DUES PAYMENT, CONTINUE
-        
-          if (strtolower($this->membership_payment_method) == 'electronic direct debit')
-            $this->membership_payment_method = 'direct debit';
-
-          // GET ALL MEMBERSHIPS
-
-
-          $this->first_membership = $this->getLastMembership($this->contact_id);
-          $this->last_membership = $this->getLastMembership($this->contact_id);
-
-          if (isset($this->last_membership['id']) &&
-              is_numeric($this->last_membership['id'])) {
+        if (isset($this->last_membership['id']) &&
+          is_numeric($this->last_membership['id'])) {
 
             $is_member = 0;
 
@@ -87,72 +90,44 @@
 
             if ($this->debug) CRM_Core_Error::debug_log_message("Is Member? {$is_member}");
 
-            $update_params = array(
-              'sequential' => 1,
-              'id' => $this->contact_id,
-            );
+            $update_params[$this->custom_fields['memberactive']] = $is_member;
 
-            if (isset($this->custom_fields['memberexpiry'])) {
+            $update_params[$this->custom_fields['memberstatus']] = $this->last_membership['status_id.name'];
 
-              if ($is_member == 1) {
-                $update_params[$this->custom_fields['memberexpiry']] = NULL;
-              }
-              else {
-                $update_params[$this->custom_fields['memberexpiry']] = $this->last_membership['end_date'];
-              }
-
-            } 
-
-            if (isset($this->custom_fields['memberjoin']))
-              $update_params[$this->custom_fields['memberjoin']] = $this->first_membership['start_date'];
-
-            if (isset($this->custom_fields['memberactive']))
-              $update_params[$this->custom_fields['memberactive']] = $is_member;
-
-            if (isset($this->custom_fields['membershippaymentmethod'])) 
-              $update_params[$this->custom_fields['membershippaymentmethod']] = $this->membership_payment_method;
-
-            if (isset($this->custom_fields['memberstatus']))
-              $update_params[$this->custom_fields['memberstatus']] = $this->last_membership['status_id.name'];
-
-            try {
-              if ($this->debug) CRM_Core_Error::debug_var("Setting Membership fields",$update_params);
-              $result = civicrm_api3('Contact', 'create', $update_params);
-
+            if ($is_member == 1) {
+              $update_params[$this->custom_fields['memberexpiry']] = NULL;
             }
-            catch (CiviCRM_API3_Exception $e) {
-              CRM_Core_Error::debug_var("Error: ",$e);
+            else {
+              $update_params[$this->custom_fields['memberexpiry']] = $this->last_membership['end_date'];
             }
 
-          }
+        } 
 
 
-        }
-        else {
+        // GET LAST MEMBER DUES PAYMENT FOR METHOD
 
-          if ($this->debug) CRM_Core_Error::debug_log_message("No Members Dues payment for Contact: {$this->contact_id}");
+        $this->membership_payment_method = $this->getMembershipPaymentMethod($this->contact_id);
 
-          $update_params = array(
-            'sequential' => 1,
-            'id' => $this->contact_id,
-          );
+        if (isset($this->membership_payment_method) &&
+              $this->membership_payment_method !== FALSE ) {
 
-          $update_params[$this->custom_fields['memberexpiry']] = '';
-          $update_params[$this->custom_fields['memberjoin']] = '';
-          $update_params[$this->custom_fields['memberactive']] = 0;
-          $update_params[$this->custom_fields['membershippaymentmethod']] = '';
-          $update_params[$this->custom_fields['memberstatus']] = '';
+          if (strtolower($this->membership_payment_method) == 'electronic direct debit')
+            $this->membership_payment_method = 'direct debit';
 
-          try {
-            if ($this->debug) CRM_Core_Error::debug_var("Setting Membership fields",$update_params);
-            $result = civicrm_api3('Contact', 'create', $update_params);
-
-          }
-          catch (CiviCRM_API3_Exception $e) {
-            CRM_Core_Error::debug_var("Error: ",$e);
-          }
+          $update_params[$this->custom_fields['membershippaymentmethod']] = $this->membership_payment_method;
 
         }
+
+    
+        try {
+          if ($this->debug) CRM_Core_Error::debug_var("Setting Membership fields",$update_params);
+          $result = civicrm_api3('Contact', 'create', $update_params);
+
+        }
+        catch (CiviCRM_API3_Exception $e) {
+          CRM_Core_Error::debug_var("Error: ",$e);
+        }
+
 
       }
 
