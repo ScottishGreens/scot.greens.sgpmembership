@@ -60,7 +60,7 @@
 
                     // If linked membership, update it
                     $res = $this->setMembershipEndDate(
-                        $this->membership['id'],
+                        $this->membership,
                         $end_date
                     );
 
@@ -83,7 +83,8 @@
             }
 
             $mf = new CRM_Utils_SGP_SetMembershipFields( array(
-                'contact_id' => $this->contact_id
+                'contact_id' => $this->contact_id,
+                'debug' => $this->debug
             ));
             $res = $mf->run();
 
@@ -241,6 +242,7 @@
 
                 $membership_params = array(
                   'sequential' => 1,
+                  'skipStatusCal' => 0,
                   'return' => ["contact_id", "id", "custom_74","membership_type_id.duration_unit"],
                   'contact_id' => $this->contact_id,
                   'join_date' => $recurr['start_date'],
@@ -274,16 +276,18 @@
     /**
      * @return array
      */
-    public function setMembershipEndDate($membership_id, $end_date) {
+    public function setMembershipEndDate($membership, $end_date) {
 
-        if (isset($membership_id) && is_numeric($membership_id)) {
+        if (isset($membership['id']) 
+            && is_numeric($membership['id'])) {
 
             $membership_params = array(
                 'sequential' => 1,
-                'id' => $membership_id,
+                'skipStatusCal' => 0,
+                'id' => $membership['id'],
+                'join_date' => $membership['join_date'],
+                'start_date' => $membership['start_date'],
                 'end_date' => $end_date,
-                'is_override' => 0,
-                'status_override_end_date' => "",
             );
 
             if ($this->debug) CRM_Core_Error::debug_var("Updating Membership: ",$membership_params);
@@ -294,7 +298,7 @@
                 return $membership_res['values'][0]['id'];
             }
             else {
-                if ($this->debug) CRM_Core_Error::debug_log_message("Failed to create Membership");
+                if ($this->debug) CRM_Core_Error::debug_log_message("Failed to update Membership");
                 return false;
             }
 
