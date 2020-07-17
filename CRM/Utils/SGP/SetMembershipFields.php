@@ -118,7 +118,7 @@
 
         }
 
-    
+
         try {
           if ($this->debug) CRM_Core_Error::debug_var("Setting Membership fields",$update_params);
           $result = civicrm_api3('Contact', 'create', $update_params);
@@ -146,6 +146,7 @@
         $result = civicrm_api3('Membership', 'get', array(
           'sequential' => 1,
           'return' => ["status_id.name", "end_date", "start_date"],
+          "membership_type_id.member_of_contact_id" => 1,
           'contact_id' => $contact_id,
           'financial_type_id' => "Member Dues",
           'options' => array('sort' => "end_date DESC", 'limit' => 1),
@@ -178,6 +179,7 @@
         $result = civicrm_api3('Membership', 'get', array(
           'sequential' => 1,
           'return' => ["status_id.name", "end_date", "start_date"],
+          "membership_type_id.member_of_contact_id" => 1,
           'contact_id' => $contact_id,
           'financial_type_id' => "Member Dues",
           'options' => array('sort' => "end_date DESC", 'limit' => 1),
