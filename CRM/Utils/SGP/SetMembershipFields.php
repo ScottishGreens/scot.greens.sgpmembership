@@ -137,11 +137,11 @@
             'id' => $this->contact_id,
           );
 
-          $update_params[$this->custom_fields['memberexpiry']] = NULL;
-          $update_params[$this->custom_fields['memberjoin']] = NULL;
+          $update_params[$this->custom_fields['memberexpiry']] = '';
+          $update_params[$this->custom_fields['memberjoin']] = '';
           $update_params[$this->custom_fields['memberactive']] = 0;
-          $update_params[$this->custom_fields['membershippaymentmethod']] = NULL;
-          $update_params[$this->custom_fields['memberstatus']] = NULL;
+          $update_params[$this->custom_fields['membershippaymentmethod']] = '';
+          $update_params[$this->custom_fields['memberstatus']] = '';
 
           try {
             if ($this->debug) CRM_Core_Error::debug_var("Setting Membership fields",$update_params);
