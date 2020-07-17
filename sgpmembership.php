@@ -20,7 +20,8 @@ function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
 
 function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
-  if(($op == 'edit' || $op == 'create') && ($objectName=='Membership')) {
+  if(($op == 'edit' || $op == 'create') 
+    && ($objectName=='Membership')) {
     
     CRM_Core_Error::debug_log_message("Updating Membership Fields for {$params->contact_id}");
     $smf = new CRM_Utils_SGP_SetMembershipFields(
@@ -33,7 +34,8 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
   }
 
-  if(($op == 'create') && ($objectName=='Contribution')
+  if(($op == 'edit' || $op == 'create') 
+    && ($objectName=='Contribution')
     && $params->financial_type_id == 2) {
 
     CRM_Core_Error::debug_log_message("Generate Recurring Payment for Contribution: {$id}");
