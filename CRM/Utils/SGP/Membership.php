@@ -46,7 +46,8 @@
                 
                 $this->membership = $this->getLinkedMembership(
                     $this->contact_id,
-                    $this->latest_members_dues['contribution_recur_id']);
+                    $this->recurring_contribution['id'],
+                    $this->recurring_contribution['frequency_unit']);
 
 
                 // generate new end date
@@ -219,7 +220,7 @@
     /**
      * @return array
      */
-    public function getLinkedMembership($contact_id, $recurr_id) {
+    public function getLinkedMembership($contact_id, $recurr_id, $duration_unit) {
 
         if (isset($recurr_id) && is_numeric($recurr_id) &&
             isset($contact_id) && is_numeric($contact_id)) {
@@ -227,7 +228,8 @@
             $membership_params = array(
                 'sequential' => 1,
                 'contact_id' => $contact_id,
-                'recurring_contribution_id' => $recurr_id
+                'recurring_contribution_id' => $recurr_id,
+                'membership_type_id.duration_unit' => $duration_unit,
             );
 
             if ($this->debug) CRM_Core_Error::debug_var("Getting Membership: ", $membership_params);
