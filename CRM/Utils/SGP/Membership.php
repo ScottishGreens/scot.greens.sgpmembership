@@ -226,13 +226,17 @@
                     $membership_rate = "Standard";
             }
 
-            $membershiptype = civicrm_api3('MembershipType', 'get', [
+            $membershiptype_params = array(
               'sequential' => 1,
               'duration_unit' => $recurr['frequency_unit'],
               'financial_type_id' => $recurr['financial_type_id'],
               'name' => ['LIKE' => "%" . $membership_rate . "%"],
               'options' => ['limit' => 1],
-            ]);
+            );
+
+            if ($this->debug) CRM_Core_Error::debug_var("Membership Type: ",$membershiptype_params);
+
+            $membershiptype = civicrm_api3('MembershipType', 'get', $membershiptype_params);
 
             if ($membershiptype['count'] > 0) {
 
