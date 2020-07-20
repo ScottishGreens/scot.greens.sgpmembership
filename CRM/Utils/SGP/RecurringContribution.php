@@ -96,6 +96,7 @@
             'financial_type_id' => $contribution['financial_type_id'],
             'payment_instrument_id' => $contribution['payment_instrument_id'],
             'amount' => $contribution['total_amount'],
+            'contribution_status_id' => ['NOT IN' => ["Cancelled"]],
             'is_test' => "0",
         );
 
@@ -201,6 +202,7 @@
             'financial_type_id' => $contrib['financial_type_id'],
             'payment_instrument_id' => $contrib['payment_instrument_id'],
             'payment_processor_id' => $payment_processor_id,
+            'is_email_receipt' => 0,
         );
 
         CRM_Core_Error::debug_var("Creating Recurring Contribution: ",$contrib_params);
