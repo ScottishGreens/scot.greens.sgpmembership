@@ -298,10 +298,10 @@
 
         // assign other attributes
 
-        $recur['contact_id'] =  $contrib['contact_id'];
-        $recur['amount'] =  $contrib['total_amount'];
-        $recur['financial_type_id'] =  $contrib['financial_type_id'];
-        $recur['payment_instrument_id'] =  $contrib['payment_instrument_id'];
+        $recur['contact_id'] =  $contribs[0]['contact_id'];
+        $recur['amount'] =  $contribs[0]['total_amount'];
+        $recur['financial_type_id'] =  $contribs[0]['financial_type_id'];
+        $recur['payment_instrument_id'] =  $contribs[0]['payment_instrument_id'];
 
         return $recur;
 
