@@ -161,7 +161,7 @@
 
          $matching_contribs_params = array(
             'sequential' => 1,
-            'return' => ["receive_date","id","amount"],
+            'return' => ["receive_date","id","total_amount"],
             'contribution_recur_id' => ['IS NULL' => 1],
             'contact_id' => $contrib['contact_id'],
             'amount' => $contrib['total_amount'],
