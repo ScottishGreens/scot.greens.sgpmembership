@@ -224,7 +224,8 @@
 
         if ($this->debug) CRM_Core_Error::debug_var("determine Recurring Attributes: ", $contribs);
 
-        if (is_array($contribs)) {
+        if (is_array($contribs) &&
+            count($contribs) > 1) {
 
             // Find frequency by getting average interval between receive dates
 
