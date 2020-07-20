@@ -117,6 +117,8 @@
             $contrib_res = null;
             $contrib_res = civicrm_api3('Contribution', 'get', $contribution_params );
 
+            if ($this->debug) CRM_Core_Error::debug_var("Latest Members Dues: ",$contrib_res);
+
             if ($contrib_res['count'] > 0) {
                 return $contrib_res['values'][0];
             }
