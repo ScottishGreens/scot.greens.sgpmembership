@@ -282,8 +282,8 @@
             if ($this->debug) CRM_Core_Error::debug_log_message("No other payments");
             // If there are no other payments we can assume this is a yearly payment
             $recur['frequency_unit'] = 'year';
-            $recur['recurring_contribution_start'] = $contrib['receive_date'];
-            $recur['recurring_contribution_end'] = $contrib['receive_date'];
+            $recur['recurring_contribution_start'] = $contribs[0]['receive_date'];
+            $recur['recurring_contribution_end'] = $contribs[0]['receive_date'];
         }
 
         // calculate next payment date
