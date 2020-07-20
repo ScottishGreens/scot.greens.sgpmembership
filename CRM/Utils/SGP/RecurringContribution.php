@@ -222,6 +222,8 @@
 
     function determineRecurringAttributes($contribs) {
 
+        if ($this->debug) CRM_Core_Error::debug_var("determine Recurring Attributes: ", $contribs);
+
         if (is_array($contribs)) {
 
             // Find frequency by getting average interval between receive dates
@@ -276,6 +278,7 @@
 
         }
         else {
+            if ($this->debug) CRM_Core_Error::debug_log_message("No other payments");
             // If there are no other payments we can assume this is a yearly payment
             $recur['frequency_unit'] = 'year';
             $recur['recurring_contribution_start'] = $contrib['receive_date'];
@@ -283,6 +286,7 @@
         }
 
         // calculate next payment date
+        if ($this->debug) CRM_Core_Error::debug_log_message("Calculating next payment date, RC End: {$recur['recurring_contribution_end']}, frequency unit: {$recur['frequency_unit']}");
 
         $date_obj = date_create_from_format('YmdHis', $recur['recurring_contribution_end']);
         if (!$date_obj) $date_obj = date_create_from_format('Y-m-d H:i:s', $recur['recurring_contribution_end']);
