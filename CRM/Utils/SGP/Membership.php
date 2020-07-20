@@ -36,6 +36,7 @@
             // Get Latest Members Dues Recurring Contribution
 
             $this->latest_members_dues = $this->getLatestMembershipContribution($this->contact_id);
+            $this->first_members_dues = $this->getFirstMembershipContribution($this->contact_id);
 
             if (isset($this->latest_members_dues['contribution_recur_id']) &&
                 is_numeric($this->latest_members_dues['contribution_recur_id'])) {
@@ -65,9 +66,11 @@
                 }
                 else {
 
+                    $join_date = $this->first_members_dues['receive_date'];
                     // If no linked membership create one
                     $res = $this->createMembership(
                         $this->recurring_contribution,
+                        $join_date,
                         $end_date
                     );
 
@@ -135,6 +138,47 @@
         }
 
     }
+
+
+    /**
+     * @return array
+     */
+    public function getFirstMembershipContribution($contact_id) {
+
+        if (isset($contact_id) && is_numeric($contact_id)) {
+
+            $contribution_params = array(
+                'sequential' => 1,
+                'contact_id' => $contact_id,
+                'financial_type_id' => "Member Dues",
+                'contribution_status_id' => ["Completed", "Pending"],
+                'options' => ['sort' => "receive_date ASC", 'limit' => 1],
+            );
+
+            if ($this->debug) CRM_Core_Error::debug_var("Getting first Members Dues: ",$contribution_params);
+
+            $contrib_res = null;
+            $contrib_res = civicrm_api3('Contribution', 'get', $contribution_params );
+
+            if ($this->debug) CRM_Core_Error::debug_var("First Members Dues: ",$contrib_res);
+
+            if ($contrib_res['count'] > 0) {
+                return $contrib_res['values'][0];
+            }
+            else {
+                if ($this->debug) CRM_Core_Error::debug_log_message("Failed to get Members Dues");
+                return false;
+            }
+
+        }
+        else {
+
+            if ($this->debug) CRM_Core_Error::debug_log_message("No Contact ID {$contact_id}");
+
+        }
+
+    }
+
 
 
 
@@ -211,7 +255,7 @@
     /**
      * @return array
      */
-    public function createMembership($recurr, $end_date) {
+    public function createMembership($recurr, $join_date, $end_date) {
 
         if (isset($recurr['id']) && is_numeric($recurr['id']) &&
             isset($end_date) && is_string($end_date)) {
@@ -250,8 +294,8 @@
                   'skipStatusCal' => 0,
                   'return' => ["contact_id", "id", "custom_74","membership_type_id.duration_unit"],
                   'contact_id' => $this->contact_id,
-                  'join_date' => $recurr['start_date'],
-                  'start_date' => $recurr['start_date'],
+                  'join_date' => $join_date,
+                  'start_date' => $join_date,
                   'end_date' => $end_date,
                   'is_test' => 0,
                   'source' => "Membership Bot",
