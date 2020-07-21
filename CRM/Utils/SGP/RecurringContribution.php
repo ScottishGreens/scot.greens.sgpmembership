@@ -49,7 +49,8 @@
 
                     $recur_attrs['payment_processor_id'] = $this->getPaymentProcessor($recur_attrs['payment_instrument_id']);
 
-                    if (is_numeric($recur_attrs['payment_processor_id'])) {
+                    if (isset($recur_attrs['payment_processor_id']) &&
+                        is_numeric($recur_attrs['payment_processor_id'])) {
 
                         $this->recurring_contribution = $this->createRecurringContribution($recur_attrs);
 
