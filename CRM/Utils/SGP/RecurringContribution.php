@@ -59,7 +59,7 @@
                     else {
 
                          if ($this->debug) CRM_Core_Error::debug_log_message("No Payment Processor");
-                         
+
                     }
 
                 }
@@ -223,7 +223,7 @@
         $contribrecur = civicrm_api3('ContributionRecur', 'create', $contrib_params );
 
         if ($contribrecur['count'] > 0) {
-            return $contribrecur['values'][0]['id'];
+            return $contribrecur['values'][0];
         }
         else {
             CRM_Core_Error::debug_log_message("Failed to create Recurring Contribution");
