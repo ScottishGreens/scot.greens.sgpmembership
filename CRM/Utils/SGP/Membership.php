@@ -42,41 +42,50 @@
                 is_numeric($this->latest_members_dues['contribution_recur_id'])) {
 
 
-                $this->recurring_contribution = $this->getRecurringContribution($this->latest_members_dues['contribution_recur_id']);
+                $this->recurring_contribution = $this->getRecurringContribution($this->latest_members_dues['contribution_recur_id'],$this->contact_id);
                 
-                $this->membership = $this->getLinkedMembership(
-                    $this->contact_id,
-                    $this->recurring_contribution['id'],
-                    $this->recurring_contribution['frequency_unit']);
+
+                if (isset($this->latest_members_dues['contribution_recur_id']) &&
+                    is_numeric($this->latest_members_dues['contribution_recur_id'])) {
+
+                    $this->membership = $this->getLinkedMembership(
+                        $this->contact_id,
+                        $this->recurring_contribution['id'],
+                        $this->recurring_contribution['frequency_unit']);
 
 
-                // generate new end date
-                $end_date = $this->moveIntervalForward(
-                    $this->latest_members_dues['receive_date'],
-                    $this->recurring_contribution['frequency_unit']
-                );
-
-                if ($this->membership['id']) {
-
-                    // If linked membership, update it
-                    $res = $this->setMembershipEndDate(
-                        $this->membership,
-                        $end_date
+                    // generate new end date
+                    $end_date = $this->moveIntervalForward(
+                        $this->latest_members_dues['receive_date'],
+                        $this->recurring_contribution['frequency_unit']
                     );
 
+                    if ($this->membership['id']) {
+
+                        // If linked membership, update it
+                        $res = $this->setMembershipEndDate(
+                            $this->membership,
+                            $end_date
+                        );
+
+                    }
+                    else {
+
+                        $join_date = $this->first_members_dues['receive_date'];
+                        // If no linked membership create one
+                        $res = $this->createMembership(
+                            $this->recurring_contribution,
+                            $join_date,
+                            $end_date
+                        );
+
+                    }
                 }
                 else {
 
-                    $join_date = $this->first_members_dues['receive_date'];
-                    // If no linked membership create one
-                    $res = $this->createMembership(
-                        $this->recurring_contribution,
-                        $join_date,
-                        $end_date
-                    );
+                    if ($this->debug) CRM_Core_Error::debug_log_message("No Recurring Contribution linked to Contribution ({$this->latest_members_dues['contribution_id']})");
 
                 }
-
             }
             else {
 
@@ -186,13 +195,14 @@
     /**
      * @return array
      */
-    public function getRecurringContribution($recurr_id) {
+    public function getRecurringContribution($recurr_id, $contact_id) {
 
         if (isset($recurr_id) && is_numeric($recurr_id)) {
 
             $recurr_params = array(
                 'sequential' => 1,
                 'id' => $recurr_id,
+                'contact_id' => $contact_id,
             );
 
             if ($this->debug) CRM_Core_Error::debug_var("Getting Recurring Contribution: ", $recurr_params);
