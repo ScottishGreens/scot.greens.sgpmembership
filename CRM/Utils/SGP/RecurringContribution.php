@@ -47,6 +47,8 @@
 
                     $recur_attrs = $this->determineRecurringAttributes($this->matching_contributions);
 
+                    $recur_attrs['payment_processor_id'] = $this->getPaymentProcessor($recur_attrs['payment_instrument_id']);
+
                     $this->recurring_contribution = $this->createRecurringContribution($recur_attrs);
 
                     $this->setRecurringContributionIDs($this->matching_contributions, $this->recurring_contribution['id']);
@@ -139,19 +141,23 @@
 
     function getPaymentProcessor($payment_instrument_id) {
 
-        $paymentprocessor = civicrm_api3('PaymentProcessor', 'get', [
+        $paymentprocessor_params = array(
             'sequential' => 1,
             'payment_instrument_id' => $payment_instrument_id,
             'domain_id' => 1,
             'is_active' => 1,
             'is_test' => 0,
-        ]);
+        );
+
+        if ($this->debug) CRM_Core_Error::debug_var("get PaymentProcessor params: ",$paymentprocessor_params);
+
+        $paymentprocessor = civicrm_api3('PaymentProcessor', 'get', $paymentprocessor_params);
 
         if ($paymentprocessor['count'] > 0) {
             return $paymentprocessor['values'][0]['id'];
         }
         else {
-            CRM_Core_Error::debug_log_message("No Payment Processor for {$this->payment_instrument_id}");
+            CRM_Core_Error::debug_log_message("No Payment Processor for {$payment_instrument_id}");
             return false;
         }
 
@@ -186,8 +192,6 @@
 
         // calculate frequency, start, and end of recurring contribution
 
-        $payment_processor_id = $this->getPaymentProcessor($contrib['payment_instrument_id']);
-
         $contrib_params = array(
             'sequential' => 1,
             'contact_id' => $contrib['contact_id'],
@@ -196,16 +200,16 @@
             'currency' => "GBP",
             'contribution_status_id' => "In Progress",
             'start_date' => $contrib['recurring_contribution_start'],
-            'next_sched_contribution_date' => $recur['recurring_contribution_next'],
-            'next_sched_contribution' => $recur['recurring_contribution_next'],
+            'next_sched_contribution_date' => $contrib['recurring_contribution_next'],
+            'next_sched_contribution' => $contrib['recurring_contribution_next'],
             'frequency_unit' => $contrib['frequency_unit'],
             'financial_type_id' => $contrib['financial_type_id'],
             'payment_instrument_id' => $contrib['payment_instrument_id'],
-            'payment_processor_id' => $payment_processor_id,
+            'payment_processor_id' => $contrib['payment_processor_id'],
             'is_email_receipt' => 0,
         );
 
-        CRM_Core_Error::debug_var("Creating Recurring Contribution: ",$contrib_params);
+        if ($this->debug) CRM_Core_Error::debug_var("Creating Recurring Contribution: ",$contrib_params);
 
         $contribrecur = civicrm_api3('ContributionRecur', 'create', $contrib_params );
 
