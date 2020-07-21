@@ -49,9 +49,18 @@
 
                     $recur_attrs['payment_processor_id'] = $this->getPaymentProcessor($recur_attrs['payment_instrument_id']);
 
-                    $this->recurring_contribution = $this->createRecurringContribution($recur_attrs);
+                    if (is_numeric($recur_attrs['payment_processor_id'])) {
 
-                    $this->setRecurringContributionIDs($this->matching_contributions, $this->recurring_contribution['id']);
+                        $this->recurring_contribution = $this->createRecurringContribution($recur_attrs);
+
+                        $this->setRecurringContributionIDs($this->matching_contributions, $this->recurring_contribution['id']);
+
+                    }
+                    else {
+
+                         if ($this->debug) CRM_Core_Error::debug_log_message("No Payment Processor");
+                         
+                    }
 
                 }
 
