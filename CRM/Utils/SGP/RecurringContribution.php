@@ -179,7 +179,7 @@
             'return' => ["receive_date","id","total_amount"],
             'contribution_recur_id' => ['IS NULL' => 1],
             'contact_id' => $contrib['contact_id'],
-            'amount' => $contrib['total_amount'],
+            'total_amount' => $contrib['total_amount'],
             'financial_type_id' => $contrib['financial_type_id'],
             'payment_instrument_id' => $contrib['payment_instrument_id'],
             'options' => ['sort' => "receive_date DESC", 'limit' => 200],
