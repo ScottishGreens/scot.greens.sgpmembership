@@ -5,6 +5,8 @@
     var $contribution_id = NULL;
     var $contribution = array();
     var $recurring_contribution = array();
+    var $matching_contributions = array();
+    var $debug = false;
 
     /**
      * @param array $params
@@ -263,7 +265,7 @@
 
                     $recur['recurring_contribution_start'] = $contribs['values'][$key]['receive_date'];
 
-                    if ($this->debug) CRM_Core_Error::debug_log_message("New Start Date {$contribs['values'][$key]['receive_date']}");
+                    if ($this->debug) CRM_Core_Error::debug_log_message("New Start Date {$recur['recurring_contribution_start']}");
                 }
 
                 if (!isset($recur['recurring_contribution_start']) ||
@@ -271,7 +273,7 @@
 
                     $recur['recurring_contribution_end'] = $contribs['values'][$key]['receive_date'];
 
-                    if ($this->debug) CRM_Core_Error::debug_log_message("New End Date {$contribs['values'][$key]['receive_date']}");
+                    if ($this->debug) CRM_Core_Error::debug_log_message("New End Date {$recur['recurring_contribution_end']}");
                     
 
                 }
@@ -279,10 +281,14 @@
 
             // calculate frequency
 
-            $date_average = array_sum($intervals) / count($intervals);
-            $interval_average_days = $date_average / (3600 * 24);
+            if (is_numeric($intervals)) {
 
-            if ($this->debug) CRM_Core_Error::debug_log_message("Payment frequency unit {$interval_average_days} days");
+                $date_average = array_sum($intervals) / count($intervals);
+                $interval_average_days = $date_average / (3600 * 24);
+
+                if ($this->debug) CRM_Core_Error::debug_log_message("Payment frequency unit {$interval_average_days} days");
+
+            }
             
             if (isset($interval_average_days) && $interval_average_days < 300 && $interval_average_days !== 0) {
                 $recur['frequency_unit'] = 'month';
