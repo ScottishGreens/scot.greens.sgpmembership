@@ -33,10 +33,12 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
     $res[] = $smf->run();
 
   }
+  
 
   if(($op == 'edit' || $op == 'create') 
     && ($objectName=='Contribution')
-    && $params->financial_type_id == 2) {
+    && $params->financial_type_id == 2
+    && in_array($params->payment_instrument_id, array(11,8)) ) {
 
     CRM_Core_Error::debug_log_message("Generate Recurring Payment for Contribution: {$id}");
     $rc = new CRM_Utils_SGP_RecurringContribution(array(
