@@ -54,31 +54,41 @@
                         $this->recurring_contribution['frequency_unit']);
 
 
-                    // generate new end date
-                    $end_date = $this->moveIntervalForward(
-                        $this->latest_members_dues['receive_date'],
-                        $this->recurring_contribution['frequency_unit']
-                    );
-
-                    if ($this->membership['id']) {
-
-                        // If linked membership, update it
-                        $res = $this->setMembershipEndDate(
-                            $this->membership,
-                            $end_date
-                        );
+                    if ($this->membership['status_id.name'] == 'Cancelled') {
+                        // If the Membership is cancelled, do nothing
+                        CRM_Core_Error::debug_log_message("Membership is cancelled");
 
                     }
-                    else {
 
-                        $join_date = $this->first_members_dues['receive_date'];
-                        // If no linked membership create one
-                        $res = $this->createMembership(
-                            $this->recurring_contribution,
-                            $join_date,
-                            $end_date
+                    else {
+                        // Otherwise, continue
+
+                        // generate new end date
+                        $end_date = $this->moveIntervalForward(
+                            $this->latest_members_dues['receive_date'],
+                            $this->recurring_contribution['frequency_unit']
                         );
 
+                        if ($this->membership['id']) {
+
+                            // If linked membership, update it
+                            $res = $this->setMembershipEndDate(
+                                $this->membership,
+                                $end_date
+                            );
+
+                        }
+                        else {
+
+                            $join_date = $this->first_members_dues['receive_date'];
+                            // If no linked membership create one
+                            $res = $this->createMembership(
+                                $this->recurring_contribution,
+                                $join_date,
+                                $end_date
+                            );
+
+                        }
                     }
                 }
                 else {
@@ -237,6 +247,7 @@
 
             $membership_params = array(
                 'sequential' => 1,
+                'return' => ["status_id.name", "contact_id", "start_date", "end_date", "membership_type_id", "join_date"],
                 'contact_id' => $contact_id,
                 'recurring_contribution_id' => $recurr_id,
                 'membership_type_id.duration_unit' => $duration_unit,
