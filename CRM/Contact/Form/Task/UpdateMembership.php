@@ -21,7 +21,7 @@ class CRM_Contact_Form_Task_UpdateMembership extends CRM_Contact_Form_Task {
 		$ll = new CRM_Utils_SGP_Membership(
 			array(
 			  'contact_id' => $contact_id,
-			  'debug' => true,
+//			  'debug' => true,
 			)
 		);
 		$res[] = $ll->updateMembership();
