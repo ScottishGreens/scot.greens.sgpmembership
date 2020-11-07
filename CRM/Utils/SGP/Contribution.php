@@ -35,47 +35,53 @@
         // If it is a Membership Contribution, continue
         if ($contrib['values'][0]['financial_type_id'] == $ft_memberdues['id']) {
 
-            // Fetch the DD payment isntrument
-
-            $option_id_dd = civicrm_api3('OptionValue', 'get', [
-              'sequential' => 1,
-              'return' => ["name"],
-              'option_group_id.name' => "payment_instrument",
-              'label' => "Direct Debit",
-            ]);
-
-            // Set the RC transaction ID
-
-            //If it is a DD then the TC transaction ID is the Contribution TXNID up to a '/' character
-            if ($contrib['values'][0]['payment_instrument_id'] == $option_id_dd['values'][0]['option_group_id']) {
-                $split = explode('/', $contrib['values'][0][$txn_custom_field]);
-                $rc_transaction_id = $split[0];
+            if (is_numeric($contrib['values'][0]['contribution_recur_id']) {
+                // If there is a recurring contribution ID, just set the variable
+                $rc_id = $contrib['values'][0]['contribution_recur_id'];
             }
             else {
-                $rc_transaction_id = $contrib['values'][0][$txn_custom_field];
+                // If no RC_ID we try to find a matching RC by transaction ID
+
+                // Fetch the DD payment instrument
+
+                $option_id_dd = civicrm_api3('OptionValue', 'get', [
+                  'sequential' => 1,
+                  'return' => ["name"],
+                  'option_group_id.name' => "payment_instrument",
+                  'label' => "Direct Debit",
+                ]);
+
+                if ($contrib['values'][0]['payment_instrument_id'] == $option_id_dd['values'][0]['option_group_id']) {
+                    // If it is a DD then the RC_TXN_ID is the Contribution TXN ID up to a '/' character
+                    $split = explode('/', $contrib['values'][0][$txn_custom_field]);
+                    $rc_transaction_id = $split[0];
+                }
+                else {
+                    // Else the RC_TXN_ID is just the Contributin TXN ID
+                    $rc_transaction_id = $contrib['values'][0][$txn_custom_field];
+                }
+
+                // Fetch Recurring Contribution by transaction id
+                $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
+                    'trxn_id' => $rc_transaction_id
+                ) );
+
+                if ($contribrecur_get['count'] != 0) {
+                    Civi::log()->debug("Recurring Contribution fetched by transaction_id {$contribrecur_get['values'][0]['id']}");
+                    $rc_id = $contribrecur_get['values'][0]['id'];
+                }
+                else {
+                    Civi::log()->debug("Generating Recurring Contribution");
+                    $rc_id = CRM_Utils_SGP_RecurringContribution::generate(
+                        $contribution_id
+                    );
+
+                }
             }
 
-            // Fetch matching Recurring Contribution
-            $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
-                'trxn_id' => $rc_transaction_id
-            ) );
+            // Update the fetched or generated RC
 
-            $rc_id = $contribrecur_get['values'][0]['id'];
-
-            if (is_numeric($rc_id)) {
-                // If we find one, move it forward
-                CRM_Utils_SGP_RecurringContribution::moveForward(
-                    $contrib['values'][0]['contribution_recur_id'], 
-                    $contrib['values'][0]['receive_date']
-                );
-            }
-            else {
-                // If not, generate an RC from this contribution
-                $rc_id = CRM_Utils_SGP_RecurringContribution::generate(
-                    $contribution_id
-                );
-
-            }
+            CRM_Utils_SGP_RecurringContribution::update($rc_id);
 
             // Either way, we link the RC to this Contribution
             $contrib_res = civicrm_api3('Contribution', 'create', [

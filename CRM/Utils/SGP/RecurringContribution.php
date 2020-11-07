@@ -292,20 +292,40 @@
     }
 
 
-    public function moveForward($recurring_contribution_id, $receive_date) {
+    public function update($recurring_contribution_id) {
 
+        // Fetch RC
         $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
+            'sequential' => 1,
             'id' => $recurring_contribution_id
         ) );
 
-        $next_date = CRM_Utils_SGP_RecurringContribution::generateNextDate($receive_date['receive_date'],$contribrecur_get['values'][0]['frequency_unit']);
+        // Fetch Latest Linked Payment
+        $latest_contrib = civicrm_api3('Contribution', 'get', [
+            'sequential' => 1,
+            'return' => ["id", "receive_date"],
+            'contribution_recur_id' => $recurring_contribution_id,
+            'is_test' => 0,
+            'contribution_status_id' => "Completed",
+            'options' => ['sort' => "receive_date DESC", 'limit' => 1],
+        ]);
+
+        // If no linked contributions, bounce
+        if ($latest_contrib['count'] == 0 ) {
+            Civi::log()->debug("No linked contributions");
+            return;
+        }
+
+        $next_date = CRM_Utils_SGP_RecurringContribution::generateNextDate(
+            $latest_contrib['values'][0]['receive_date'],
+            $contribrecur_get['values'][0]['frequency_unit']);
 
         try {
             $contribrecur_set = civicrm_api3('ContributionRecur', 'create', array(
                 'id' => $recurring_contribution_id,
                 'next_sched_contribution' => $next_date,
                 'next_sched_contribution_date' => $next_date,
-                'modified_date' => $receive_date,
+                'modified_date' => $latest_contrib['values'][0]['receive_date'],
             ) );
         }
         catch (CiviCRM_API3_Exception $e) { CRM_Core_Error::debug_var("Error: ",$e); }
