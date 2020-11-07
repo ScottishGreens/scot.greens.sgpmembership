@@ -10,27 +10,20 @@ class CRM_Contribute_Form_Task_GenerateRecurringPayment extends CRM_Contribute_F
    */
   public function preProcess() {
 
-    CRM_Core_Error::debug_log_message("preProcess CreateRecurringPayment");
-    
     parent::preProcess();
     // we have all the contribution ids, so now we get the contact ids
     parent::setContactIDs();
     
     $count = count($this->_contributionIds);
-    
-    foreach ($this->_contributionIds as $contrib_id) {
-      
-      CRM_Core_Error::debug_log_message("Generate Recurring Payment for {$contrib_id}");
-      
-      $ll = new CRM_Utils_SGP_RecurringContribution(array(
-        'contribution_id' => $contrib_id,
-      ));
-      $res[] = $ll->generate();
+    $rows = array();
 
+    foreach ($this->_contributionIds as $contrib_id) {
+      Civi::log()->debug("Processing Contribution {$contrib_id}");
+      $rows[] = CRM_Utils_SGP_RecurringContribution::generate($contrib_id);
     }
     
     $this->assign('count', $count);
-    $this->assign('rows', $res);
+    $this->assign('rows', $rows);
 
     CRM_Core_Error::debug_log_message("Finished. {$count} payments processed.");
 

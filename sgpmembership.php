@@ -5,13 +5,25 @@ require_once 'sgpmembership.civix.php';
 function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
   if($objectType=='contact') {
     array_push($tasks, array(
-      'title' => "SGP - Update Membership", 
-      'class' => "CRM_Contact_Form_Task_UpdateMembership", 
+      'title' => "SGP - Update Memberships", 
+      'class' => "CRM_Contact_Form_Task_UpdateMemberships", 
+    ));
+    array_push($tasks, array(
+      'title' => "SGP - Fix Missing Memberships",
+      'class' => "CRM_Contact_Form_Task_FixMissingMemberships", 
+    ));
+    array_push($tasks, array(
+      'title' => "SGP - Fix Membership Types", 
+      'class' => "CRM_Contact_Form_Task_FixMembershipTypes", 
+    ));
+    array_push($tasks, array(
+      'title' => "SGP - Fix Recurring Contributions", 
+      'class' => "CRM_Contact_Form_Task_FixRecurringContributions", 
     ));
   }
   if($objectType=='contribution') {
     array_push($tasks, array(
-      'title' => "SGP - Generate Recurring Payment", 
+      'title' => "SGP - Generate Recurring Contribution", 
       'class' => "CRM_Contribute_Form_Task_GenerateRecurringPayment", 
     ));
   }
@@ -20,44 +32,63 @@ function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
 
 function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
-  if(($op == 'edit' || $op == 'create') 
-    && ($objectName=='Membership')) {
-    
-    CRM_Core_Error::debug_log_message("Updating Membership Fields for {$params->contact_id}");
-    $smf = new CRM_Utils_SGP_SetMembershipFields(
-      array(
-        'contact_id' => $params->contact_id,
-        'debug' => true,
-      )
-    );
-    $res[] = $smf->run();
+  if($op == 'edit' || $op == 'create') {
+
+    switch ($objectName) {
+
+      case 'Membership':
+        $mem = new CRM_Utils_SGP_Membership();
+        $mem->setMembershipFields($params->contact_id);
+        break;
+
+      case 'Contribution':
+
+        // Check not a test payment and status is completed
+        if ($params->is_test != 0 &&
+            $params->contribution_status_id == 1) {
+
+          // Get Member Dues financial type
+          $ft_memberdues = civicrm_api3('FinancialType', 'get', [
+            'sequential' => 1,
+            'return' => ["id"],
+            'name' => "Member Dues",
+          ]);
+
+          if ($ft_memberdues['count'] == 0) {
+              return;
+          }
+
+          if ($params->financial_type_id == $ft_memberdues['id']) {
+
+            $option_id_paypal = civicrm_api3('OptionValue', 'get', [
+              'sequential' => 1,
+              'return' => ["name"],
+              'option_group_id.name' => "payment_instrument",
+              'name' => "paypal",
+            ]);
+
+            $option_id_so = civicrm_api3('OptionValue', 'get', [
+              'sequential' => 1,
+              'return' => ["name"],
+              'option_group_id.name' => "payment_instrument",
+              'name' => "standing order",
+            ]);
+
+            // If this payment is paypal or standing order, process it
+            if ($params->payment_instrument_id == $option_id_paypal['values']['id']
+                || $params->payment_instrument_id == $option_id_so['values']['id']) {
+                CRM_Utils_SGP_Contribution::processMembershipContribution($params->contact_id);
+            }
+
+          }
+
+        }
+
+        break;
+
+    }
 
   }
-
-
-  if(($op == 'edit' || $op == 'create') 
-    && ($objectName=='Contribution')
-    && $params->financial_type_id == 2
-    && in_array($params->payment_instrument_id, array(11,8)) ) {
-
-    CRM_Core_Error::debug_log_message("Generate Recurring Payment for Contribution: {$id}");
-    $rc = new CRM_Utils_SGP_RecurringContribution(array(
-      'contribution_id' => $id,
-      'debug' => true,
-    ));
-    $res[] = $rc->generate();
-
-    CRM_Core_Error::debug_log_message("Updating Membership for Contact: {$params->contact_id}");
-    $m = new CRM_Utils_SGP_Membership(
-      array(
-        'contact_id' => $params->contact_id,
-        'debug' => true,
-      )
-    );
-    $res = $m->updateMembership();
-
-  }
-
 
 }
 
