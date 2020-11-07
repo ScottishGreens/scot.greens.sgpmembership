@@ -26,6 +26,10 @@ function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
       'title' => "SGP - Generate Recurring Contribution", 
       'class' => "CRM_Contribute_Form_Task_GenerateRecurringPayment", 
     ));
+    array_push($tasks, array(
+      'title' => "SGP - Process Member Dues", 
+      'class' => "CRM_Contribute_Form_Task_ProcessMemberDues", 
+    ));
   }
   
 }
