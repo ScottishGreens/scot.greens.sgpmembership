@@ -13,7 +13,7 @@
         ]);
 
         $txn_custom_field = CRM_Utils_SGP_Contribution::getTransactionIDCustomField();
-        
+
         // If neither exist, we bounce
         if (is_null($txn_custom_field)) {
             Civi::log()->debug("No Custom Field");
@@ -78,12 +78,17 @@
             }
 
             // Either way, we link the RC to this Contribution
-            $contrib = civicrm_api3('Contribution', 'create', [
-              'id' => $contribution_id,
+            $contrib_res = civicrm_api3('Contribution', 'create', [
+              'id' => $contrib['values'][0]['contact_id'],
+              'contact_id' => $rc_id
               'contribution_recur_id' => $rc_id
             ]); 
 
+            return true;
+            
         }
+
+        return false;
 
     }
 
