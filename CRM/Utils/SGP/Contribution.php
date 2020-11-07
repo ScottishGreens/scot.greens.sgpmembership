@@ -79,13 +79,13 @@
 
             // Either way, we link the RC to this Contribution
             $contrib_res = civicrm_api3('Contribution', 'create', [
-              'id' => $contrib['values'][0]['contact_id'],
-              'contact_id' => $rc_id
+              'id' => $contribution_id,
+              'contact_id' => $contrib['values'][0]['contact_id'],
               'contribution_recur_id' => $rc_id
             ]); 
 
             return true;
-            
+
         }
 
         return false;
