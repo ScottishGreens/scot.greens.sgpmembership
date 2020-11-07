@@ -28,7 +28,7 @@
         Civi::log()->debug("Getting Contribution info");
         $contrib = civicrm_api3('Contribution', 'get', [
           'sequential' => 1,
-          'return' => ["receive_date",'contact_id','contribution_recur_id',"total_amount","financial_type_id", "payment_instrument_id", $txn_custom_field],
+          'return' => ["receive_date",'contact_id','contribution_recur_id',"total_amount","financial_type_id", "payment_instrument_id", "trxn_id", $txn_custom_field],
           'id' => $contribution_id,
         ]); 
 
@@ -53,12 +53,17 @@
 
                 if ($contrib['values'][0]['payment_instrument_id'] == $option_id_dd['values'][0]['option_group_id']) {
                     // If it is a DD then the RC_TXN_ID is the Contribution TXN ID up to a '/' character
-                    $split = explode('/', $contrib['values'][0][$txn_custom_field]);
+                    $split = explode('/', $contrib['values'][0]['trxn_id']);
                     $rc_transaction_id = $split[0];
                 }
                 else {
-                    // Else the RC_TXN_ID is just the Contributin TXN ID
+                    // Else the RC_TXN_ID is the Custom Field TXN ID we imported from a CSV
                     $rc_transaction_id = $contrib['values'][0][$txn_custom_field];
+                }
+
+                if (!is_numeric($rc_transaction_id) {
+                    Civi::log()->debug("No valid transaction id");
+                    return;
                 }
 
                 // Fetch Recurring Contribution by transaction id
