@@ -83,7 +83,7 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
                 || $params->payment_instrument_id == $option_id_so['values']['id']) {
                 CRM_Utils_SGP_Contribution::processMembershipContribution($id);
             }
-            
+
           }
 
         }
@@ -94,15 +94,7 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
         
         Civi::log()->debug("Updating membership linked to {$id}");
 
-        //Fetch Linked Membership
-        $membership = civicrm_api3('Membership', 'get', array(
-            'sequential' => 1,
-            'recurring_contribution_id' => $id,
-            'is_test' => 0,
-            'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]]
-        ) );
-
-        // Update linked Memberships
+        // Update linked Membership
         $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($id);
 
 
