@@ -43,11 +43,11 @@
 
             //If it is a DD then the TC transaction ID is the Contribution TXNID up to a '/' character
             if ($contrib['values'][0]['payment_instrument_id'] == $option_id_dd['values'][0]['option_group_id']) {
-                $split = explode('/', $contrib['values'][0][$txn_custom_field])
+                $split = explode('/', $contrib['values'][0][$txn_custom_field]);
                 $rc_transaction_id = $split[0];
             }
             else {
-                $rc_transaction_id = $contrib['values'][0][$txn_custom_field]
+                $rc_transaction_id = $contrib['values'][0][$txn_custom_field];
             }
 
             // Fetch matching Recurring Contribution
