@@ -90,7 +90,7 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
         break;
 
-      case 'Recurring Contribution':
+      case 'ContributionRecur':
         
         Civi::log()->debug("Updating membership linked to {$id}");
 
