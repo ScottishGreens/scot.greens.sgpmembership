@@ -27,13 +27,32 @@
           'id' => $contribution_id,
         ]); 
 
-
         // If it is a Membership Contribution, continue
         if ($contrib['values'][0]['financial_type_id'] == $ft_memberdues['id']) {
 
+            // Fetch the DD payment isntrument
+
+            $option_id_dd = civicrm_api3('OptionValue', 'get', [
+              'sequential' => 1,
+              'return' => ["name"],
+              'option_group_id.name' => "payment_instrument",
+              'label' => "Direct Debit",
+            ]);
+
+            // Set the RC transaction ID
+
+            //If it is a DD then the TC transaction ID is the Contribution TXNID up to a '/' character
+            if ($contrib['values'][0]['payment_instrument_id'] == $option_id_dd['values'][0]['option_group_id']) {
+                $split = explode('/', $contrib['values'][0][$txn_custom_field])
+                $rc_transaction_id = $split[0];
+            }
+            else {
+                $rc_transaction_id = $contrib['values'][0][$txn_custom_field]
+            }
+
             // Fetch matching Recurring Contribution
             $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
-                'trxn_id' => $transaction_id
+                'trxn_id' => $rc_transaction_id
             ) );
 
             $rc_id = $contribrecur_get['values'][0]['id'];
