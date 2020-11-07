@@ -12,10 +12,15 @@
           'name' => "Member Dues",
         ]);
 
-        $txn_custom_field = getTransactionIDCustomField();
-
+        $txn_custom_field = CRM_Utils_SGP_Contribution::getTransactionIDCustomField();
+        
         // If neither exist, we bounce
-        if ($ft_memberdues['count'] == 0 || !is_null($txn_custom_field)) {
+        if (is_null($txn_custom_field)) {
+            Civi::log()->debug("No Custom Field");
+            return;
+        }
+        if ($ft_memberdues['count'] == 0) {
+            Civi::log()->debug("No Member Dues FinancialType");
             return;
         }
 
