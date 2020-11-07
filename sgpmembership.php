@@ -82,7 +82,8 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
             if ($params->payment_instrument_id == $option_id_paypal['values']['id']
                 || $params->payment_instrument_id == $option_id_so['values']['id']) {
                 CRM_Utils_SGP_Contribution::processMembershipContribution($id);
-
+            }
+            
           }
 
         }
