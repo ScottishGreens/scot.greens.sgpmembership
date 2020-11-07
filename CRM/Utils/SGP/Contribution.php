@@ -35,7 +35,7 @@
         // If it is a Membership Contribution, continue
         if ($contrib['values'][0]['financial_type_id'] == $ft_memberdues['id']) {
 
-            if (is_numeric($contrib['values'][0]['contribution_recur_id']) {
+            if (is_numeric($contrib['values'][0]['contribution_recur_id'])) {
                 // If there is a recurring contribution ID, just set the variable
                 $rc_id = $contrib['values'][0]['contribution_recur_id'];
             }
