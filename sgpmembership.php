@@ -81,8 +81,7 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
             // If this payment is paypal or standing order, process it
             if ($params->payment_instrument_id == $option_id_paypal['values']['id']
                 || $params->payment_instrument_id == $option_id_so['values']['id']) {
-                CRM_Utils_SGP_Contribution::processMembershipContribution($params->contact_id);
-            }
+                CRM_Utils_SGP_Contribution::processMembershipContribution($id);
 
           }
 
@@ -91,19 +90,19 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
         break;
 
       case 'Recurring Contribution':
+        
+        Civi::log()->debug("Updating membership linked to {$id}");
 
         //Fetch Linked Membership
         $membership = civicrm_api3('Membership', 'get', array(
             'sequential' => 1,
-            'contact_id' => $contact_id,
-            'recurring_contribution_id' => $recurring_contribution_id,
+            'recurring_contribution_id' => $id,
             'is_test' => 0,
             'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]]
         ) );
 
-        // Move Linked Memberships Forward
-        $mem = new CRM_Utils_SGP_Membership($membership['values']['id']);
-        $mem->moveForward();
+        // Update linked Memberships
+        $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($id);
 
 
     }
