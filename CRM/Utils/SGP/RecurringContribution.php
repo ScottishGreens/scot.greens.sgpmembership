@@ -310,13 +310,6 @@
         }
         catch (CiviCRM_API3_Exception $e) { CRM_Core_Error::debug_var("Error: ",$e); }
 
-        // Move Linked Memberships Forward
-        $mem = new CRM_Utils_SGP_Membership();
-        $mem->moveForward(
-            $contribrecur_get['values'][0]['contact_id'],
-            $recurring_contribution_id, 
-            $next_date);
-
         return true;
 
     }

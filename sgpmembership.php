@@ -86,6 +86,22 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
         break;
 
+      case 'Recurring Contribution':
+
+        //Fetch Linked Membership
+        $membership = civicrm_api3('Membership', 'get', array(
+            'sequential' => 1,
+            'contact_id' => $contact_id,
+            'recurring_contribution_id' => $recurring_contribution_id,
+            'is_test' => 0,
+            'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]]
+        ) );
+
+        // Move Linked Memberships Forward
+        $mem = new CRM_Utils_SGP_Membership($membership['values']['id']);
+        $mem->moveForward();
+
+
     }
 
   }
