@@ -319,8 +319,8 @@
             'id' => $membership['values'][0]['contribution_recur_id']
         ) );
 
-        Civi::log()->debug("End date {$rc['values'][0]['next_sched_contribution_date'],}");
-        Civi::log()->debug("Start date is {$rc['values'][0]['start_date'],}");
+        Civi::log()->debug("End date {$rc['values'][0]['next_sched_contribution_date',}");
+        Civi::log()->debug("Start date is {$rc['values'][0]['start_date']}");
 
         // Update Membership
         $membership_params = array(
