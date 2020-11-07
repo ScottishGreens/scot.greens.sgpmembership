@@ -126,54 +126,6 @@
 
     }
 
-    public function updateEndDateFromRC($recurring_contribution_id) {
-
-        $rc = civicrm_api3('ContributionRecur', 'get', array(
-            'sequential' => 1,
-            'id' => $recurring_contribution_id
-        ) );
-
-        $membership = civicrm_api3('Membership', 'get', array(
-            'sequential' => 1,
-            'contact_id' => $rc['values'][0]['contact_id'],
-            'recurring_contribution_id' => $recurring_contribution_id,
-            'is_test' => 0,
-            'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]]
-        ) );
-
-        if ($membership['error'] 
-          || $membership['count'] == 0 
-          || $membership['values'][0]['is_override'] == 1 
-          || $rc['error'] 
-          || $rc['count'] == 0 ) {
-             Civi::log()->debug("No active membership");
-            return false;
-        }
-
-        Civi::log()->debug("New Membership end date for ID {$membership['values'][0]['id']} is {$rc['values'][0]['next_sched_contribution_date']}");
-
-        $membership_set_params = $membership['values'][0];
-        $membership_set_params['skipStatusCal'] = 0;
-        $membership_set_params['end_date'] =  $rc['values'][0]['next_sched_contribution_date'];
-
-        $membership_set = civicrm_api3('Membership', 'create', $membership_set_params);
-        
-        return true;
-
-    }
-
-
-
-
-  /**
-   * fixMissingMembership
-   *
-   * @param string $membership_id
-   *
-   * generates a Membership from a Recurring Contribution
-   *
-   */
-
     public function fixMissingMembership($recurring_contribution_id) {
 
         // Fetch similar Membership
@@ -193,14 +145,6 @@
 
     }
 
-  /**
-   * fixMembershipType
-   *
-   * @param string $membership_id
-   *
-   * Fixes a membership whose recurring payment is of a different frequency
-   *
-   */
 
     public function fixMembershipType($membership_id) {
 
@@ -291,7 +235,8 @@
 
     }
 
-    public function updateMembership($membership_id) {
+
+    public function update($membership_id) {
 
         Civi::log()->debug("update Membership {$membership_id}");
 
@@ -311,6 +256,9 @@
              Civi::log()->debug("No active membership or no recurring_contribution_id");
             return false;
         }
+
+        // First update RC
+        CRM_Utils_SGP_RecurringContribution::update($membership['values'][0]['contribution_recur_id']);
 
         // Fetch Recurring Contribution
         $rc = civicrm_api3('ContributionRecur', 'get', array(
@@ -336,6 +284,45 @@
         $membership_set = civicrm_api3('Membership', 'create', $membership_params );
 
     }
+
+
+    public function updateEndDateFromRC($recurring_contribution_id) {
+
+        $rc = civicrm_api3('ContributionRecur', 'get', array(
+            'sequential' => 1,
+            'id' => $recurring_contribution_id
+        ) );
+
+        $membership = civicrm_api3('Membership', 'get', array(
+            'sequential' => 1,
+            'contact_id' => $rc['values'][0]['contact_id'],
+            'recurring_contribution_id' => $recurring_contribution_id,
+            'is_test' => 0,
+            'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]]
+        ) );
+
+        if ($membership['error'] 
+          || $membership['count'] == 0 
+          || $membership['values'][0]['is_override'] == 1 
+          || $rc['error'] 
+          || $rc['count'] == 0 ) {
+             Civi::log()->debug("No active membership");
+            return false;
+        }
+
+        Civi::log()->debug("New Membership end date for ID {$membership['values'][0]['id']} is {$rc['values'][0]['next_sched_contribution_date']}");
+
+        $membership_set_params = $membership['values'][0];
+        $membership_set_params['skipStatusCal'] = 0;
+        $membership_set_params['end_date'] =  $rc['values'][0]['next_sched_contribution_date'];
+
+        $membership_set = civicrm_api3('Membership', 'create', $membership_set_params);
+        
+        return true;
+
+    }
+
+
 
     function getTransactionIDCustomField() {
 

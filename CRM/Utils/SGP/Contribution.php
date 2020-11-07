@@ -90,7 +90,6 @@
 
                 }
 
-
                 // Update the fetched or generated RC
                 CRM_Utils_SGP_RecurringContribution::update($rc_id);
 
