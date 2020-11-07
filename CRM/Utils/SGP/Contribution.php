@@ -37,6 +37,8 @@
 
             if (is_numeric($contrib['values'][0]['contribution_recur_id'])) {
                 // If there is a recurring contribution ID, just set the variable
+                Civi::log()->debug("Recurring Contribution fetched by rc_id {$contrib['values'][0]['contribution_recur_id']}");
+
                 $rc_id = $contrib['values'][0]['contribution_recur_id'];
             }
             else {
@@ -65,6 +67,8 @@
                     Civi::log()->debug("No valid transaction id");
                     return;
                 }
+                
+                Civi::log()->debug("Recurring Transaction ID {$rc_transaction_id}");
 
                 // Fetch Recurring Contribution by transaction id
                 $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
