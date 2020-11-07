@@ -128,16 +128,17 @@
 
     public function updateEndDateFromRC($recurring_contribution_id) {
 
-        $membership = civicrm_api3('Membership', 'get', array(
-            'sequential' => 1,
-            'recurring_contribution_id' => $recurring_contribution_id,
-            'is_test' => 0,
-            'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]]
-        ) );
-
         $rc = civicrm_api3('ContributionRecur', 'get', array(
             'sequential' => 1,
             'id' => $recurring_contribution_id
+        ) );
+
+        $membership = civicrm_api3('Membership', 'get', array(
+            'sequential' => 1,
+            'contact_id' => $rc['values'][0]['contact_id'],
+            'recurring_contribution_id' => $recurring_contribution_id,
+            'is_test' => 0,
+            'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]]
         ) );
 
         if ($membership['error'] 
@@ -149,20 +150,15 @@
             return false;
         }
 
-        Civi::log()->debug("New Membership end date is {$rc['values'][0]['next_sched_contribution_date']}");
+        Civi::log()->debug("New Membership end date for ID {$membership['values'][0]['id']} is {$rc['values'][0]['next_sched_contribution_date']}");
 
         $membership_set_params = $membership['values'][0];
         $membership_set_params['skipStatusCal'] = 0;
         $membership_set_params['end_date'] =  $rc['values'][0]['next_sched_contribution_date'];
 
-        try {
-            $membership_set = civicrm_api3('Membership', 'create', $membership_set_params);
-            return true;
-        }
-        catch (CiviCRM_API3_Exception $e) {
-          CRM_Core_Error::debug_var("Error: ",$e);
-        }
-
+        $membership_set = civicrm_api3('Membership', 'create', $membership_set_params);
+        
+        return true;
 
     }
 
