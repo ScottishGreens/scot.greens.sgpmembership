@@ -305,6 +305,7 @@
         ) );
 
         if ($membership['error'] 
+          || $membership['count'] == 0
           || $membership['values'][0]['is_override'] == 1
           || !is_numeric($membership['values'][0]['contribution_recur_id'])) {
              Civi::log()->debug("No active membership or no recurring_contribution_id");
@@ -318,14 +319,12 @@
             'id' => $membership['values'][0]['contribution_recur_id']
         ) );
 
-        // Calc End Date
-        $new_end_date = CRM_Utils_SGP_RecurringContribution::generateNextDate(
-            $rc['values'][0]['next_sched_contribution_date'],
-            $membership['values'][0]['membership_type_id.duration_unit']
-        );
+        Civi::log()->debug("End date {$rc['values'][0]['next_sched_contribution_date'],}");
+        Civi::log()->debug("Start date is {$rc['values'][0]['start_date'],}");
 
         // Update Membership
         $membership_params = array(
+            "id" => $membership['values'][0]['id'],
             "contact_id" => $membership['values'][0]['contact_id'],
             "membership_type_id" => $membership['values'][0]['membership_type_id'],
             "join_date" => $rc['values'][0]['start_date'],
