@@ -304,25 +304,23 @@
             'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]],
         ) );
 
-        if ($membership['error'] || $membership['values'][0]['is_override'] == 1 ) {
-             Civi::log()->debug("No active membership");
+        if ($membership['error'] 
+          || $membership['values'][0]['is_override'] == 1
+          || !is_numeric($membership['values'][0]['contribution_recur_id'])) {
+             Civi::log()->debug("No active membership or no recurring_contribution_id");
             return false;
         }
 
-        // Fetch Latest Linked Contribution
-        $contrib = civicrm_api3('Contribution', 'get', array(
+        // Fetch Recurring Contribution
+        $rc = civicrm_api3('ContributionRecur', 'get', array(
             'sequential' => 1,
-            'return' => ["receive_date"],
-            'recurring_contribution_id' => $membership['recurring_contribution_id'],
-            'options' => [
-                'sort' => "receive_date DESC", 
-                'limit' => 1
-            ],
+            'return' => ["next_sched_contribution_date"],
+            'id' => $membership['values'][0]['contribution_recur_id']
         ) );
 
         // Calc End Date
         $new_end_date = CRM_Utils_SGP_RecurringContribution::generateNextDate(
-            $contrib['values'][0]['receive_date'],
+            $rc['values'][0]['next_sched_contribution_date'],
             $membership['values'][0]['membership_type_id.duration_unit']
         );
 
@@ -330,10 +328,10 @@
         $membership_params = array(
             "contact_id" => $membership['values'][0]['contact_id'],
             "membership_type_id" => $membership['values'][0]['membership_type_id'],
-            "join_date" => $membership['values'][0]['join_date'],
-            "start_date" => $membership['values'][0]['start_date'],
-            "end_date" => $new_end_date,
-            "skipStatusCal" => 0,
+            "join_date" => $rc['values'][0]['start_date'],
+            "start_date" => $rc['values'][0]['start_date'],
+            "end_date" => $rc['values'][0]['next_sched_contribution_date'],
+            "skipStatusCal" => 0,a
         );
 
         $membership_set = civicrm_api3('Membership', 'create', $membership_params );
