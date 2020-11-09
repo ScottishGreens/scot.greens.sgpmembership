@@ -289,7 +289,7 @@
         $membership = civicrm_api3('Membership', 'get', array(
             'sequential' => 1,
             'contact_id' => $rc['values'][0]['contact_id'],
-            'recurring_contribution_id' => $recurring_contribution_id,
+            'contribution_recur_id' => $recurring_contribution_id,
             'is_test' => 0,
             'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]]
         ) );
