@@ -261,11 +261,10 @@
         if  (is_numeric($membership['values'][0]['contribution_recur_id'])) {
 
           // If this is a membership with a Recurring Contribution, updating it will refresh the membershp
-
           CRM_Utils_SGP_RecurringContribution::update($membership['values'][0]['contribution_recur_id']);
 
           return true;
-          
+
         }
         else {  
 
@@ -307,6 +306,7 @@
 
         $membership_set_params = $membership['values'][0];
         $membership_set_params['skipStatusCal'] = 0;
+        $membership_set_params['start_date'] =  $rc['values'][0]['start_date'];
         $membership_set_params['end_date'] =  $rc['values'][0]['next_sched_contribution_date'];
 
         $membership_set = civicrm_api3('Membership', 'create', $membership_set_params);
