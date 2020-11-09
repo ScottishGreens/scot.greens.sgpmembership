@@ -306,6 +306,17 @@
 
         $membership_set_params = $membership['values'][0];
         $membership_set_params['skipStatusCal'] = 0;
+        $membership_set_params['creat'] =  $rc['values'][0]['start_date'];
+
+        if ($rc['values'][0]['create_date'] < $rc['values'][0]['start_date']) {
+          // If the RC creation date is before the start date, we use it as the join date.
+          $membership_set_params['join_date'] = $rc['values'][0]['create_date'];
+        }
+        else {
+          // Else we use the RC start date for join date
+          $membership_set_params['join_date'] = $rc['values'][0]['start_date'];
+        }
+
         $membership_set_params['start_date'] =  $rc['values'][0]['start_date'];
         $membership_set_params['end_date'] =  $rc['values'][0]['next_sched_contribution_date'];
 
