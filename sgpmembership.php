@@ -5,7 +5,7 @@ require_once 'sgpmembership.civix.php';
 function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
   if($objectType=='contact') {
     array_push($tasks, array(
-      'title' => "SGP - Update Memberships", 
+      'title' => "SGP - Refresh Memberships", 
       'class' => "CRM_Contact_Form_Task_UpdateMemberships", 
     ));
     array_push($tasks, array(
@@ -41,12 +41,14 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
     switch ($objectName) {
 
       case 'Membership':
+
         $mem = new CRM_Utils_SGP_Membership();
         $mem->setMembershipFields($params->contact_id);
         break;
 
       case 'Contribution':
 
+      /* 
         // Check not a test payment and status is completed
         if ($params->is_test != 0 &&
             $params->contribution_status_id == 1) {
@@ -90,13 +92,14 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
         break;
 
+        */
+
       case 'ContributionRecur':
         
         Civi::log()->debug("Updating membership linked to {$id}");
 
         // Update linked Membership
         $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($id);
-
 
     }
 

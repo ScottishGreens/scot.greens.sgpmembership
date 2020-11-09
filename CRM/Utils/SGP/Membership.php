@@ -236,7 +236,7 @@
     }
 
 
-    public function update($membership_id) {
+    public function refresh($membership_id) {
 
         Civi::log()->debug("update Membership {$membership_id}");
 
@@ -244,44 +244,37 @@
         $membership = civicrm_api3('Membership', 'get', array(
             'sequential' => 1,
             'id' => $membership_id,
-            'return' => ["is_override","membership_type_id.duration_unit", "contribution_recur_id","contact_id", "membership_type_id","join_date", "start_date", "end_date"],
+            'return' => ["id","is_override","membership_type_id.duration_unit", "contribution_recur_id","contact_id", "membership_type_id","join_date", "start_date", "end_date"],
             'is_test' => 0,
             'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]],
         ) );
 
+        //
+
         if ($membership['error'] 
           || $membership['count'] == 0
-          || $membership['values'][0]['is_override'] == 1
-          || !is_numeric($membership['values'][0]['contribution_recur_id'])) {
-             Civi::log()->debug("No active membership or no recurring_contribution_id");
+          || $membership['values'][0]['is_override'] == 1) {
+             Civi::log()->debug("No active membership");
             return false;
         }
 
-        // First update RC
-        CRM_Utils_SGP_RecurringContribution::update($membership['values'][0]['contribution_recur_id']);
+        if  (is_numeric($membership['values'][0]['contribution_recur_id'])) {
 
-        // Fetch Recurring Contribution
-        $rc = civicrm_api3('ContributionRecur', 'get', array(
-            'sequential' => 1,
-            'return' => ["next_sched_contribution_date"],
-            'id' => $membership['values'][0]['contribution_recur_id']
-        ) );
+          // If this is a membership with a Recurring Contribution, updating it will refresh the membershp
 
-        Civi::log()->debug("End date {$rc['values'][0]['next_sched_contribution_date']}");
-        Civi::log()->debug("Start date is {$rc['values'][0]['start_date']}");
+          CRM_Utils_SGP_RecurringContribution::update($membership['values'][0]['contribution_recur_id']);
 
-        // Update Membership
-        $membership_params = array(
-            "id" => $membership['values'][0]['id'],
-            "contact_id" => $membership['values'][0]['contact_id'],
-            "membership_type_id" => $membership['values'][0]['membership_type_id'],
-            "join_date" => $rc['values'][0]['start_date'],
-            "start_date" => $rc['values'][0]['start_date'],
-            "end_date" => $rc['values'][0]['next_sched_contribution_date'],
-            "skipStatusCal" => 0,a
-        );
+          return true;
+          
+        }
+        else {  
 
-        $membership_set = civicrm_api3('Membership', 'create', $membership_params );
+          // We don't currenly refresh manual memberships
+             Civi::log()->debug("No linked recurring contribution");
+            return false;
+
+        }
+
 
     }
 
