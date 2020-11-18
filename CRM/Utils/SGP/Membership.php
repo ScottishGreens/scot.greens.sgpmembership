@@ -366,7 +366,7 @@
         $first_membership = $this->getFirstMembership($contact_id);
 
         if (is_numeric($first_membership['id']))
-          $update_params[$custom_fields['memberjoin']] = $first_membership['start_date'];
+          $update_params[$custom_fields['memberjoin']] = $first_membership['join_date'];
 
         // GET LAST MEMBERSHIP FOR STATUS AND END DATE
         $last_membership = $this->getLastMembership($contact_id);
