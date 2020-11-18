@@ -238,7 +238,7 @@
 
     public function refresh($membership_id) {
 
-        Civi::log()->debug("update Membership {$membership_id}");
+        Civi::log()->debug("Refresh Membership {$membership_id}");
 
         // Fetch Membership
         $membership = civicrm_api3('Membership', 'get', array(
