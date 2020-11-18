@@ -403,7 +403,7 @@
             $update_params[$custom_fields['memberstatus']] = $last_membership['status_id.name'];
 
             if ($is_member == 1) {
-              $update_params[$custom_fields['memberexpiry']] = NULL;
+              $update_params[$custom_fields['memberexpiry']] = "";
             }
             else {
               $update_params[$custom_fields['memberexpiry']] = $last_membership['end_date'];
