@@ -346,6 +346,8 @@
 
     public function setMembershipFields($contact_id) {
 
+        Civi::log()->debug("Setting Membership Fields for {$contact_id}");
+
         $custom_fields = $this->getMembershipCustomFields();
 
         $update_params = array(
@@ -424,6 +426,7 @@
 
         }
 
+        Civi::log()->debug("Update params: ", $update_params);
 
         try {
           $result = civicrm_api3('Contact', 'create', $update_params);
@@ -445,11 +448,11 @@
       try {
         $result = civicrm_api3('Membership', 'get', array(
           'sequential' => 1,
-          'return' => ["status_id.name", "end_date", "start_date"],
-          "membership_type_id.member_of_contact_id" => 1,
           'contact_id' => $contact_id,
-          'financial_type_id' => "Member Dues",
-          'options' => array('sort' => "end_date DESC", 'limit' => 1),
+          'return' => ["status_id.name", "end_date", "start_date", "join_date"],
+          "membership_type_id.member_of_contact_id" => 1,
+          'membership_type_id.financial_type_id' => "Member Dues",
+          'options' => array('sort' => "join_date ASC", 'limit' => 1),
         ));
       }
       catch (CiviCRM_API3_Exception $e) {
@@ -470,10 +473,10 @@
       try {
         $result = civicrm_api3('Membership', 'get', array(
           'sequential' => 1,
-          'return' => ["status_id.name", "end_date", "start_date"],
-          "membership_type_id.member_of_contact_id" => 1,
           'contact_id' => $contact_id,
-          'financial_type_id' => "Member Dues",
+          'return' => ["status_id.name", "end_date", "start_date", "join_date"],
+          "membership_type_id.member_of_contact_id" => 1,
+          'membership_type_id.financial_type_id' => "Member Dues",
           'options' => array('sort' => "end_date DESC", 'limit' => 1),
         ));
       }
