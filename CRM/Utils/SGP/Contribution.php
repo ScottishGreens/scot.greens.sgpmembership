@@ -66,8 +66,8 @@
                     $rc_transaction_id = $contrib['values'][0][$txn_custom_field];
                 }
 
-                if (!is_numeric($rc_transaction_id)) {
-                    Civi::log()->debug("No valid transaction id");
+                if (!isset($rc_transaction_id) || $rc_transaction_id == "") {
+                    Civi::log()->debug("No valid transaction id {$rc_transaction_id}");
                     return;
                 }
                 
