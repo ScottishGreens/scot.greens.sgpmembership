@@ -187,7 +187,7 @@
         if (is_numeric($membership_id)) {
             // If we find one, set the Recurring ID and update it
             $mem->setRecurringID($membership_id, $contribrecur['id']);
-            $mem->updateMembership($membership_id);
+            $mem->refresh($membership_id);
 
         }
         else {
