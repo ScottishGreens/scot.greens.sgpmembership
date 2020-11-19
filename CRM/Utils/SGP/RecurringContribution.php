@@ -214,7 +214,7 @@
         $contribs = civicrm_api3('Contribution', 'get', [
           'sequential' => 1,
           'options' => ['limit' => 1],
-          'return' => ['id',$txn_custom_field]
+          'return' => ['id',$txn_custom_field],
           'contribution_recur_id' => $recurring_contribution_id,
         ]); 
 
@@ -224,7 +224,7 @@
             return;
         }
 
-        $recurring_transaction_id = $contribs['values'][0][$txn_custom_field]
+        $recurring_transaction_id = $contribs['values'][0][$txn_custom_field];
 
         Civi::log()->debug("Set transaction ID to {$recurring_transaction_id}");
 
