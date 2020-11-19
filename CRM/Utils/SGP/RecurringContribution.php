@@ -199,6 +199,44 @@
 
     }
 
+    public function setTransactionID($recurring_contribution_id) {
+
+        Civi::log()->debug("Set transaction ID for {$recurring_contribution_id}");
+
+        $txn_custom_field = CRM_Utils_SGP_Contribution::getTransactionIDCustomField();
+
+        // If neither exist, we bounce
+        if (is_null($txn_custom_field)) {
+            Civi::log()->debug("No Transaction ID Custom Field");
+            return;
+        }
+
+        $contribs = civicrm_api3('Contribution', 'get', [
+          'sequential' => 1,
+          'options' => ['limit' => 1],
+          'return' => ['id',$txn_custom_field]
+          'contribution_recur_id' => $recurring_contribution_id,
+        ]); 
+
+        // If neither exist, we bounce
+        if (!isset($contribs['values'][0][$txn_custom_field])) {
+            Civi::log()->debug("No matching contributions with transaction_id");
+            return;
+        }
+
+        $recurring_transaction_id = $contribs['values'][0][$txn_custom_field]
+
+        Civi::log()->debug("Set transaction ID to {$recurring_transaction_id}");
+
+        $recurr = civicrm_api3('ContributionRecur', 'create', [
+          'sequential' => 1,
+          'id' => $recurring_contribution_id,
+          'trxn_id' => $recurring_transaction_id,
+        ]); 
+
+        return true;
+
+    }
 
     public function getMembersDuesRecurringContributions($contact_id) {
 
@@ -351,6 +389,8 @@
     }
 
     public function fix($recurring_contribution_id) {
+
+        CRM_Utils_SGP_RecurringContribution::setTransactionID($recurring_contribution_id);
 
         $recurr_get = civicrm_api3('ContributionRecur', 'get', array(
             'sequential' => 1,
