@@ -16,11 +16,11 @@
 
         // If neither exist, we bounce
         if (is_null($txn_custom_field)) {
-            Civi::log()->debug("No Custom Field");
+            CRM_Core_Error::debug_log_message('No Custom Field');
             return;
         }
         if ($ft_memberdues['count'] == 0) {
-            Civi::log()->debug("No Member Dues FinancialType");
+            CRM_Core_Error::debug_log_message('No Member Dues FinancialType');
             return;
         }
 
@@ -67,7 +67,7 @@
                 }
 
                 if (!isset($rc_transaction_id) || $rc_transaction_id == "") {
-                    Civi::log()->debug("No valid transaction id {$rc_transaction_id}");
+                    CRM_Core_Error::debug_log_message('No valid transaction id {$rc_transaction_id}');
                     return;
                 }
                 
