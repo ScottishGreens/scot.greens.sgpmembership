@@ -335,7 +335,7 @@
         // Fetch RC
         $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
             'sequential' => 1,
-            'return' => ['frequency_unit', 'amount', 'contact_id', 'id', 'frequency_interval']
+            'return' => ['frequency_unit', 'amount', 'contact_id', 'id', 'frequency_interval'],
             'id' => $recurring_contribution_id
         ) );
 
