@@ -335,6 +335,7 @@
         // Fetch RC
         $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
             'sequential' => 1,
+            'return' => ['frequency_unit', 'amount', 'contact_id', 'id', 'frequency_interval']
             'id' => $recurring_contribution_id
         ) );
 
@@ -359,17 +360,18 @@
         $next_date = CRM_Utils_SGP_RecurringContribution::generateNextDate(
         $latest_contrib['values'][0]['receive_date'],
         $contribrecur_get['values'][0]['frequency_unit']);
-        
+
         Civi::log()->debug("Next payment date is {$next_date}");
 
+        $contribution_set_params = $contribrecur_get['values'][0];
+        $contribution_set_params['next_sched_contribution'] = $next_date;
+        $contribution_set_params['next_sched_contribution_date'] = $next_date;
+        $contribution_set_params['modified_date'] = $latest_contrib['values'][0]['receive_date'];
+
         try {
-            $contribrecur_set = civicrm_api3('ContributionRecur', 'create', array(
-                'id' => $recurring_contribution_id,
-                'next_sched_contribution' => $next_date,
-                'next_sched_contribution_date' => $next_date,
-                'modified_date' => $latest_contrib['values'][0]['receive_date'],
-            ) );
+            $contribrecur_set = civicrm_api3('ContributionRecur', 'create', $contribution_set_params);
         }
+
         catch (CiviCRM_API3_Exception $e) { CRM_Core_Error::debug_var("Error: ",$e); }
 
         return true;
