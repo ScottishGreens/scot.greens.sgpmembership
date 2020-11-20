@@ -230,6 +230,7 @@
 
         $recurr = civicrm_api3('ContributionRecur', 'create', [
           'sequential' => 1,
+          'contact_id' => $contribs['values'][0]['contact_id'],
           'id' => $recurring_contribution_id,
           'trxn_id' => $recurring_transaction_id,
         ]); 
