@@ -241,7 +241,7 @@
         $recurring_transaction_id = $contribs['values'][0][$txn_custom_field];
 
         $recurr_create_params = $contribrecur_get['values'][0];
-        $recurr_create_params['trxn_id'] = $recurring_transaction_id,
+        $recurr_create_params['trxn_id'] = $recurring_transaction_id;
 
 
         Civi::log()->debug("Set transaction ID to {$recurring_transaction_id}");
