@@ -293,8 +293,7 @@
             'status_id' => ['NOT IN' => ["Cancelled", "Deceased"]]
         ) );
 
-        if ($membership['error'] 
-          || $membership['count'] == 0 
+        if ($membership['count'] == 0 
           || $membership['values'][0]['is_override'] == 1 
           || $rc['error'] 
           || $rc['count'] == 0 ) {
