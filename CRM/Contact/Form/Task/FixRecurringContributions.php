@@ -24,9 +24,8 @@ class CRM_Contact_Form_Task_FixRecurringContributions extends CRM_Contact_Form_T
       ]);
 
       foreach ($recur['values'] as $r) {
-       CRM_Core_Error::debug_log_message("Processing {$contact_id} Recuyrring Contribution {$r['id']}");
-        $rc = new CRM_Utils_SGP_RecurringContribution();
-        $res[] = $rc->fix($r['id']);
+        CRM_Core_Error::debug_log_message("Processing {$contact_id} Recurring Contribution {$r['id']}");
+        CRM_Utils_SGP_RecurringContribution::setTransactionID($r['id']);
       }
 
     }
