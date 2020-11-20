@@ -41,8 +41,6 @@
 
                 $rc_id = $contrib['values'][0]['contribution_recur_id'];
 
-                CRM_Utils_SGP_RecurringContribution::update($rc_id);
-
             }
             else {
                 // If no RC_ID we try to find a matching RC by transaction ID
@@ -90,17 +88,17 @@
 
                 }
 
-                // Update the fetched or generated RC
-                CRM_Utils_SGP_RecurringContribution::update($rc_id);
-
                 // Either way, we link the RC to this Contribution
                 $contrib_res = civicrm_api3('Contribution', 'create', [
                   'id' => $contribution_id,
                   'contact_id' => $contrib['values'][0]['contact_id'],
                   'contribution_recur_id' => $rc_id
                 ]); 
+
             }
 
+            // Update the fetched or generated RC
+            CRM_Utils_SGP_RecurringContribution::update($rc_id);
 
             return true;
 
