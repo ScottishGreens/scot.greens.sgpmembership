@@ -74,7 +74,6 @@
                 // Fetch Recurring Contribution by transaction id
                 $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
                     'sequential' => 1,
-                    'contact_id' => $rc_transaction_id
                     'trxn_id' => $rc_transaction_id
                 ) );
 
