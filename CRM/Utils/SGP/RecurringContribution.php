@@ -230,10 +230,12 @@
 
         $recurr = civicrm_api3('ContributionRecur', 'create', [
           'sequential' => 1,
-          'contact_id' => $contribs['values'][0]['contact_id'],
+          'contact_id' => $contribs['values'][0]['contact_id#'],
           'id' => $recurring_contribution_id,
           'trxn_id' => $recurring_transaction_id,
         ]); 
+
+        CRM_Utils_SGP_RecurringContribution::update($recurring_contribution_id);
 
         return true;
 
@@ -359,8 +361,8 @@
         Civi::log()->debug("Latest Contribution is {$latest_contrib['values'][0]['receive_date']}");
 
         $next_date = CRM_Utils_SGP_RecurringContribution::generateNextDate(
-        $latest_contrib['values'][0]['receive_date'],
-        $contribrecur_get['values'][0]['frequency_unit']);
+            $latest_contrib['values'][0]['receive_date'],
+            $contribrecur_get['values'][0]['frequency_unit']);
 
         Civi::log()->debug("Next payment date is {$next_date}");
 
