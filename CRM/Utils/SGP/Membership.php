@@ -356,7 +356,6 @@
 
         $update_params[$custom_fields['memberexpiry']] = '';
         $update_params[$custom_fields['memberjoin']] = '';
-        $update_params[$custom_fields['memberactive']] = 0;
         $update_params[$custom_fields['membershippaymentmethod']] = '';
         $update_params[$custom_fields['memberstatus']] = '';
 
@@ -375,8 +374,7 @@
         if (isset($last_membership['id']) &&
           is_numeric($last_membership['id'])) {
 
-            $is_member = 0;
-
+            /*
             switch ($last_membership['status_id.name']) {
 
                case 'Pending':
@@ -394,19 +392,18 @@
                 $is_member = 0;
                 break;
 
-            }
-
-
-            $update_params[$custom_fields['memberactive']] = $is_member;
+            } 
+            */
 
             $update_params[$custom_fields['memberstatus']] = $last_membership['status_id.name'];
 
-            if ($is_member == 1) {
-              $update_params[$custom_fields['memberexpiry']] = "";
-            }
-            else {
-              $update_params[$custom_fields['memberexpiry']] = $last_membership['end_date'];
-            }
+            // Generate expiry date by adding 3 months of grace onto the end date of the membership
+            $date_obj = date_create_from_format('YmdHis', $last_membership['end_date']);
+            if (!$date_obj) $date_obj = date_create_from_format('Y-m-d', $last_membership['end_date']);
+            if (!$date_obj) $date_obj = date_create_from_format('Y-m-d H:i:s', $last_membership['end_date']);
+            $expiry_date_obj = date_modify($date_obj,'+3 months');
+
+            $update_params[$custom_fields['memberexpiry']] = $expiry_date_obj->format('Y-m-d');
 
         } 
 
@@ -553,10 +550,6 @@
     if ( isset($result) && $result['count'] > 0 ) {
       foreach ($result['values'] as $field) {
         switch ($field['label']) {
-          case 'Is Member':
-            $custom_fields['memberactive'] = 'custom_' . $field['id'];
-            //CRM_Core_Error::debug_log_message("Current field: {$custom_fields['memberactive']}");
-            break;
 
           case 'Member Status':
             $custom_fields['memberstatus'] = 'custom_' . $field['id'];
