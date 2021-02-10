@@ -64,7 +64,6 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
       case 'Contribution':
 
-      /* 
         // Check not a test payment and status is completed
         if ($params->is_test != 0 &&
             $params->contribution_status_id == 1) {
@@ -107,8 +106,6 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
         }
 
         break;
-
-        */
 
       case 'ContributionRecur':
         
