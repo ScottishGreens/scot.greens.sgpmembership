@@ -508,7 +508,7 @@
 
         $contrib_get = civicrm_api3('Contribution', 'get', array(
             'sequential' => 1,  
-            'return' => ["source"],
+            'return' => ["contribution_source"],
             'contribution_recur_id' => $recurring_contribution_id,
             'options' => array('sort' => "receive_date ASC", 'limit' => 1),
         ));
@@ -518,7 +518,7 @@
             return false;
         }
 
-        $first_payment_source = $contrib_get['values'][0]['source'];
+        $first_payment_source = $contrib_get['values'][0]['contribution_source'];
 
         Civi::log()->debug("Source: {$first_payment_source} ");
 
