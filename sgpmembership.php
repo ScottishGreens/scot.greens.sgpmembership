@@ -20,6 +20,10 @@ function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
       'title' => "SGP - Fix Recurring Contributions", 
       'class' => "CRM_Contact_Form_Task_FixRecurringContributions", 
     ));
+    array_push($tasks, array(
+      'title' => "SGP - Set Recurring Contributions Source", 
+      'class' => "CRM_Contact_Form_Task_SetRecurringContributionsSource", 
+    ));
   }
   if($objectType=='contribution') {
     array_push($tasks, array(
@@ -35,6 +39,18 @@ function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
 }
 
 function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
+
+  if($op == 'create') {
+
+    switch ($objectName) {
+
+      case 'ContributionRecur':
+
+        CRM_Utils_SGP_RecurringContribution::setSource($id);
+
+    }
+
+  }
 
   if($op == 'edit' || $op == 'create') {
 

@@ -482,5 +482,57 @@
     }
 
 
+    function getRCSourceCustomField() {
+
+        // Get Recurring Transaction ID Custom Field
+        $cf_res = civicrm_api3('CustomField', 'get', [
+          'sequential' => 1,
+          'label' => "Recurring Payment Source",
+          'custom_group_id.extends' => "ContributionRecur",
+        ]);
+
+        Civi::log()->debug("Recurring Payment Source CustomField custom_{$cf_res['id']}");
+
+        return "custom_".$cf_res['id'];
+
+    }
+
+    public function setSource($recurring_contribution_id) {
+
+        $recur_source_field = CRM_Utils_SGP_RecurringContribution::getRCSourceCustomField();
+
+        if (!isset($recur_source_field)) {
+            Civi::log()->debug("No Custom Field");
+            return false;
+        }
+
+        $contrib_get = civicrm_api3('Contribution', 'get', array(
+            'sequential' => 1,  
+            'return' => ["source"],
+            'contribution_recur_id' => $recurring_contribution_id,
+            'options' => array('sort' => "receive_date ASC", 'limit' => 1),
+        ));
+
+        if (!isset($contrib_get['values'][0])) {
+            Civi::log()->debug("No Contributions");
+            return false;
+        }
+
+        $first_payment_source = $contrib_get['values'][0]['source'];
+
+        Civi::log()->debug("Source: {$first_payment_source} ");
+
+        $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
+            'sequential' => 1,
+            'id' => $recurring_contribution_id,
+            'api.ContributionRecur.create' => [$recur_source_field => $first_payment_source],
+        ) );
+
+
+    }
+        
+
+
+
 }
 
