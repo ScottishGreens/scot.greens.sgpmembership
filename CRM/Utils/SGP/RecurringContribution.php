@@ -388,6 +388,20 @@
 
         catch (CiviCRM_API3_Exception $e) { CRM_Core_Error::debug_var("Error: ",$e); }
 
+        /* Refresh memberships linked to this contact */
+
+        $memberships = civicrm_api3('Membership', 'get', [
+            'sequential' => 1,
+            'return' => 'id',
+            'recurring_contribution_id' => $recurring_contribution_id
+        ]);
+
+        foreach ($memberships['values'] as $m) {
+            CRM_Core_Error::debug_log_message("Processing Membership {$m['id']}");
+            $mem = new CRM_Utils_SGP_Membership();
+            $res[] = $mem->refresh($m['id']);
+        }
+
         return true;
 
     }
@@ -508,7 +522,7 @@
 
         $contrib_get = civicrm_api3('Contribution', 'get', array(
             'sequential' => 1,  
-            'return' => ["contribution_source"],
+            'return' => ["contribution_source","contribution_page_id"],
             'contribution_recur_id' => $recurring_contribution_id,
             'options' => array('sort' => "receive_date ASC", 'limit' => 1),
         ));
@@ -518,7 +532,20 @@
             return false;
         }
 
-        $first_payment_source = $contrib_get['values'][0]['contribution_source'];
+        $contrib_page_get = civicrm_api3('ContributionPage', 'get', [
+          'sequential' => 1,
+          'return' => ["title"],
+          'id' => $contrib_get['values'][0]['contribution_page_id'],
+        ]);
+
+        // If the Contribution Souce is SDCR (generic Smart Debit collection code)  we use the contribution page name as a backup
+
+        if ($contrib_get['values'][0]['contribution_source'] == '[SDCR]') {
+            $first_payment_source = $contrib_page_get['values'][0]['title'];
+        }
+        else {
+            $first_payment_source = $contrib_get['values'][0]['contribution_source'];
+        }
 
         Civi::log()->debug("Source: {$first_payment_source} ");
 
