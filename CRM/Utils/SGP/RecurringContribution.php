@@ -559,6 +559,53 @@
     }
         
 
+    /*
+    First DD Contributions should be set to pending rather than completed.
+    */
+    public function fixPendingDDPayments($recurring_contribution_id) {
+
+        $recur_source_field = CRM_Utils_SGP_RecurringContribution::getRCSourceCustomField();
+
+        if (!isset($recur_source_field)) {
+            Civi::log()->debug("No Custom Field");
+            return false;
+        }
+
+        $contrib_get = civicrm_api3('Contribution', 'get', array(
+            'sequential' => 1,  
+            'return' => ["trxn_id"],
+            'payment_instrument_id' => ["Direct Debit", "Electronic Direct Debit"],
+            'contribution_recur_id' => $recurring_contribution_id,
+            'options' => array('sort' => "receive_date ASC", 'limit' => 1),
+        ));
+
+        if (!isset($contrib_get['values'][0])) {
+            Civi::log()->debug("No Contributions");
+            return false;
+        }
+
+        /* If the transaction ID does not contain a / character then it isn't a 'real' payment */
+
+        if (strpos($contrib_get['values'][0]['trxn_id'],'/') == 0) {
+
+            $contrib_set = civicrm_api3('Contribution', 'create', array(
+                'sequential' => 1,  
+                'id' => $contrib_get['values'][0]['id'],
+                'contribution_status_id' => "Pending",
+            ));
+
+        } 
+        else {
+            
+            Civi::log()->debug("Not a pending payment, Txn: {$contrib_get['values'][0]['trxn_id']}");
+            return false;
+
+        }
+
+
+
+    }
+        
 
 
 }

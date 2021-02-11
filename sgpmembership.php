@@ -24,6 +24,10 @@ function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
       'title' => "SGP - Set Recurring Contributions Source", 
       'class' => "CRM_Contact_Form_Task_SetRecurringContributionsSource", 
     ));
+    array_push($tasks, array(
+      'title' => "SGP - Fix DD Pending Payments", 
+      'class' => "CRM_Contact_Form_Task_FixDDPending", 
+    ));
   }
   if($objectType=='contribution') {
     array_push($tasks, array(
