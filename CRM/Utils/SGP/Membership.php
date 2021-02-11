@@ -305,7 +305,6 @@
 
         $membership_set_params = $membership['values'][0];
         $membership_set_params['skipStatusCal'] = 0;
-        $membership_set_params['creat'] =  $rc['values'][0]['start_date'];
 
         if ($rc['values'][0]['create_date'] < $rc['values'][0]['start_date']) {
           // If the RC creation date is before the start date, we use it as the join date.
@@ -356,6 +355,7 @@
 
         $update_params[$custom_fields['memberexpiry']] = '';
         $update_params[$custom_fields['memberjoin']] = '';
+        $update_params[$custom_fields['memberactive']] = 0;
         $update_params[$custom_fields['membershippaymentmethod']] = '';
         $update_params[$custom_fields['memberstatus']] = '';
 
@@ -374,26 +374,11 @@
         if (isset($last_membership['id']) &&
           is_numeric($last_membership['id'])) {
 
-            /*
-            switch ($last_membership['status_id.name']) {
+            if ($last_membership['status_id.name'] == 'Pending') {
 
-               case 'Pending':
                 $last_membership['status_id.name'] = 'New';
-               case 'New':
-               case 'Current':
-               case 'Grace - Pending':
-               case 'Grace':
-                $is_member = 1;
-                break;
-               case 'Deceased':
-               case 'Cancelled':
-               case 'Expired':
-               default:
-                $is_member = 0;
-                break;
 
-            } 
-            */
+            }
 
             $update_params[$custom_fields['memberstatus']] = $last_membership['status_id.name'];
 
@@ -404,6 +389,7 @@
             $expiry_date_obj = date_modify($date_obj,'+3 months');
 
             $update_params[$custom_fields['memberexpiry']] = $expiry_date_obj->format('Y-m-d');
+
 
         } 
 
@@ -550,6 +536,10 @@
     if ( isset($result) && $result['count'] > 0 ) {
       foreach ($result['values'] as $field) {
         switch ($field['label']) {
+          case 'Is Member':
+            $custom_fields['memberactive'] = 'custom_' . $field['id'];
+            //CRM_Core_Error::debug_log_message("Current field: {$custom_fields['memberactive']}");
+            break;
 
           case 'Member Status':
             $custom_fields['memberstatus'] = 'custom_' . $field['id'];

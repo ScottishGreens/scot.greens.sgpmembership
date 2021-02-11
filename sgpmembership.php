@@ -106,14 +106,14 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
         }
 
         break;
-
+/*
       case 'ContributionRecur':
         
         Civi::log()->debug("Updating membership linked to {$id}");
 
         // Update linked Membership
         $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($id);
-
+*/
     }
 
   }
