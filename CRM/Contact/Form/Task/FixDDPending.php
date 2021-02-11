@@ -25,7 +25,7 @@ class CRM_Contact_Form_Task_FixDDPending extends CRM_Contact_Form_Task {
 
       foreach ($recur['values'] as $r) {
         CRM_Core_Error::debug_log_message("Processing {$contact_id} Recurring Contribution {$r['id']}");
-        CRM_Utils_SGP_RecurringContribution::setTransactionID($r['id']);
+        CRM_Utils_SGP_RecurringContribution::fixPendingDDPayments($r['id']);
       }
 
     }
