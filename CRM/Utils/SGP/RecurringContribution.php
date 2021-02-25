@@ -199,6 +199,51 @@
 
     }
 
+
+    // removeUnmatchedPayments()
+
+    // Find payments linked to this Rc that do not have the correct transaction ID and unlink them.
+
+    public function removeUnmatchedPayments($recurring_contribution_id) {
+
+        Civi::log()->debug("RC {$recurring_contribution_id} - remove unmatched payments");
+
+        $txn_custom_field = CRM_Utils_SGP_Contribution::getTransactionIDCustomField();
+
+        // If neither exist, we bounce
+        if (is_null($txn_custom_field)) {
+            Civi::log()->debug("RC {$recurring_contribution_id} - No Transaction ID Custom Field");
+            return;
+        }
+
+        // Fetch RC transaction ID
+        $rc_trxid = civicrm_api3('ContributionRecur', 'get', array(
+            'sequential' => 1,
+            'return' => ['trxn_id'],
+            'id' => $recurring_contribution_id
+        ) );
+
+        if (!isset($rc_trxid['values'][0]['trxn_id'])) {
+            Civi::log()->debug("RC {$recurring_contribution_id} - No Transaction ID");
+            return;
+        }
+
+        // Get payments linked to this RC that do NOT have the matching transaction ID and unlink them from this RC
+        $contribs = civicrm_api3('Contribution', 'get', [
+          'sequential' => 1,
+          $txn_custom_field =>  ['!=' => $rc_trxid['values'][0]['trxn_id']],
+          'contribution_recur_id' => $recurring_contribution_id,
+          'api.Contribution.create' => ['contribution_recur_id' => ''],
+        ]); 
+
+    }
+
+
+    // setTransactionID()
+
+    // To set the transaction ID for a Recurring Contribution we find a linked Contribution and fetch the Recurring Transaction ID from it. This Recurring Transaction ID for Paypal or Standing Order payments is included on the import.
+
+
     public function setTransactionID($recurring_contribution_id) {
 
         Civi::log()->debug("Set transaction ID for {$recurring_contribution_id}");
@@ -499,6 +544,7 @@
         return "custom_".$cf_res['id'];
 
     }
+
 
     public function setSource($recurring_contribution_id) {
 
