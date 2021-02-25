@@ -121,7 +121,7 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
           // If the RC is Member Dues and Paypal or Standing Orders update a linked membership
 
-          Civi::log()->debug("Updating membership linked to Recurring ID {$id}");
+          Civi::log()->debug("RC {$recurring_contribution_id} - Updating linked Membership");
 
           $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($id);
 
