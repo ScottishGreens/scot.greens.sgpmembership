@@ -388,20 +388,6 @@
 
         catch (CiviCRM_API3_Exception $e) { CRM_Core_Error::debug_var("Error: ",$e); }
 
-        /* Refresh memberships linked to this contact */
-
-        $memberships = civicrm_api3('Membership', 'get', [
-            'sequential' => 1,
-            'return' => 'id',
-            'recurring_contribution_id' => $recurring_contribution_id
-        ]);
-
-        foreach ($memberships['values'] as $m) {
-            CRM_Core_Error::debug_log_message("Processing Membership {$m['id']}");
-            $mem = new CRM_Utils_SGP_Membership();
-            $res[] = $mem->refresh($m['id']);
-        }
-
         return true;
 
     }

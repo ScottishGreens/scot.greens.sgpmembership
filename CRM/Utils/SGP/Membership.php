@@ -235,6 +235,23 @@
 
     }
 
+    public function refreshAll($contact_id) {
+
+      $memberships = civicrm_api3('Membership', 'get', [
+        'sequential' => 1,
+        'return' => 'id',
+        'contact_id' => $contact_id,
+      ]);
+
+      foreach ($memberships['values'] as $m) {
+       CRM_Core_Error::debug_log_message("Processing {$contact_id} Membership {$m['id']}");
+        $res[] = $this->refresh($m['id']);
+      }
+
+      return $res;
+
+    }
+
 
     public function refresh($membership_id) {
 
@@ -260,7 +277,7 @@
 
         if  (is_numeric($membership['values'][0]['contribution_recur_id'])) {
 
-          // If this is a membership with a Recurring Contribution, updating it will refresh the membershp
+          // If this is a membership with a Recurring Contribution, update it so it has the correct end dates
           CRM_Utils_SGP_RecurringContribution::update($membership['values'][0]['contribution_recur_id']);
 
           return true;
@@ -355,7 +372,6 @@
 
         $update_params[$custom_fields['memberexpiry']] = '';
         $update_params[$custom_fields['memberjoin']] = '';
-        $update_params[$custom_fields['memberactive']] = 0;
         $update_params[$custom_fields['membershippaymentmethod']] = '';
         $update_params[$custom_fields['memberstatus']] = '';
 

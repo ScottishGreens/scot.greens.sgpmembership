@@ -16,20 +16,11 @@ class CRM_Contact_Form_Task_UpdateMemberships extends CRM_Contact_Form_Task {
     foreach ($this->_contactIds as $contact_id) {
 
       CRM_Core_Error::debug_log_message("Processing {$contact_id}");
-
-      $memberships = civicrm_api3('Membership', 'get', [
-        'sequential' => 1,
-        'return' => 'id',
-        'contact_id' => $contact_id,
-      ]);
-
-      foreach ($memberships['values'] as $m) {
-       CRM_Core_Error::debug_log_message("Processing {$contact_id} Membership {$m['id']}");
-        $mem = new CRM_Utils_SGP_Membership();
-        $res[] = $mem->refresh($m['id']);
-      }
+      $mem = new CRM_Utils_SGP_Membership();
+      $res[] = $mem->refreshAll($contact_id);
 
     }
+    
     $this->assign('count', $count);
     $this->assign('rows', $res);
 

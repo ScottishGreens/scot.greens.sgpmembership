@@ -24,10 +24,10 @@ function sgpmembership_civicrm_searchTasks($objectType, &$tasks) {
       'title' => "SGP - Set Recurring Contributions Source", 
       'class' => "CRM_Contact_Form_Task_SetRecurringContributionsSource", 
     ));
-    array_push($tasks, array(
+/*    array_push($tasks, array(
       'title' => "SGP - Fix DD Pending Payments", 
       'class' => "CRM_Contact_Form_Task_FixDDPending", 
-    ));
+    )); */
   }
   if($objectType=='contribution') {
     array_push($tasks, array(
@@ -66,43 +66,39 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
         $mem->setMembershipFields($params->contact_id);
         break;
 
+
+      //
+      // PROCESS PAYPAL / SO MEMBERS DUES ON IMPORT OR MANUAL CREATION
+      //
+
       case 'Contribution':
 
         // Check not a test payment and status is completed
         if ($params->is_test != 0 &&
             $params->contribution_status_id == 1) {
 
-          // Get Member Dues financial type
-          $ft_memberdues = civicrm_api3('FinancialType', 'get', [
-            'sequential' => 1,
-            'return' => ["id"],
-            'name' => "Member Dues",
-          ]);
 
-          if ($ft_memberdues['count'] == 0) {
+          // Get Member Dues financial type
+          $ft_memberdues = civicrm_api3('FinancialType', 'get', ['sequential' => 1,'return' => ["name"],'id' => $params->financial_type_id, ]);
+
+          if (!$ft_memberdues['values'][0]['name'] == 'Member Dues') {
               return;
           }
 
           if ($params->financial_type_id == $ft_memberdues['id']) {
 
-            $option_id_paypal = civicrm_api3('OptionValue', 'get', [
-              'sequential' => 1,
-              'return' => ["name"],
-              'option_group_id.name' => "payment_instrument",
-              'name' => "paypal",
-            ]);
+            $method_name = civicrm_api3('OptionValue', 'get', ['sequential' => 1,'return' => ["name"],'option_group_id.name' => "payment_instrument",'id' => $params->payment_instrument_id, ]);
 
-            $option_id_so = civicrm_api3('OptionValue', 'get', [
-              'sequential' => 1,
-              'return' => ["name"],
-              'option_group_id.name' => "payment_instrument",
-              'name' => "standing order",
-            ]);
+            if ($method_name['values'][0]'name'] == 'standing order' ||
+                $method_name['values'][0]'name'] == 'paypal order' ) {
 
-            // If this payment is paypal or standing order, process it
-            if ($params->payment_instrument_id == $option_id_paypal['values']['id']
-                || $params->payment_instrument_id == $option_id_so['values']['id']) {
-                CRM_Utils_SGP_Contribution::processMembershipContribution($id);
+                // If this payment is paypal or standing order, process it
+                // Link this Contribution to a matching RC
+                CRM_Utils_SGP_Contribution::linkContributionToRC($id);
+                
+                // Refresh all Memberships for this contact
+                CRM_Utils_SGP_Membership::refreshAll($contact_id);
+
             }
 
           }
@@ -110,14 +106,28 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
         }
 
         break;
-/*
-      case 'ContributionRecur':
-        
-        Civi::log()->debug("Updating membership linked to {$id}");
 
-        // Update linked Membership
-        $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($id);
-*/
+      case 'ContributionRecur':
+      
+        // Fetch the RC 
+        $result = civicrm_api3('ContributionRecur', 'get', [
+          'sequential' => 1,
+          'id' => $id,
+          'financial_type_id' => "Member Dues",
+          'payment_instrument_id' => ["Paypal", "Standing Order"],
+        ]);
+
+        if ($result['count'] > 0) {
+
+          // If the RC is Member Dues and Paypal or Standing Orders we continue
+
+          Civi::log()->debug("Updating membership linked to Recurring ID {$id}");
+
+          // Update linked Membership
+          $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($id);
+
+        }
+
     }
 
   }
