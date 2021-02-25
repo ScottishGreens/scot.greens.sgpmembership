@@ -255,7 +255,7 @@
 
     public function refresh($membership_id) {
 
-        Civi::log()->debug("Refresh Membership {$membership_id}");
+        Civi::log()->debug("Membership {$membership_id} - Refresh");
 
         // Fetch Membership
         $membership = civicrm_api3('Membership', 'get', array(
@@ -271,7 +271,7 @@
         if ($membership['error'] 
           || $membership['count'] == 0
           || $membership['values'][0]['is_override'] == 1) {
-             Civi::log()->debug("No active membership");
+             Civi::log()->debug("Membership {$membership_id} - No active membership");
             return false;
         }
 
@@ -285,8 +285,8 @@
         }
         else {  
 
-          // We don't currenly refresh manual memberships
-             Civi::log()->debug("No linked recurring contribution");
+            // We don't currenly refresh manual memberships
+             Civi::log()->debug("Membership {$membership_id} - No linked recurring contribution");
             return false;
 
         }

@@ -346,6 +346,8 @@
 
     public function update($recurring_contribution_id) {
 
+        Civi::log()->debug("RC {$recurring_contribution_id} - Refresh");
+
         // Fetch RC
         $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
             'sequential' => 1,
@@ -365,17 +367,17 @@
 
         // If no linked contributions, bounce
         if ($latest_contrib['count'] == 0 ) {
-            Civi::log()->debug("No linked contributions");
+            Civi::log()->debug("RC {$recurring_contribution_id} - No linked contributions");
             return;
         }
         
-        Civi::log()->debug("Latest Contribution is {$latest_contrib['values'][0]['receive_date']}");
+        Civi::log()->debug("RC {$recurring_contribution_id} - Latest Contribution is {$latest_contrib['values'][0]['receive_date']}");
 
         $next_date = CRM_Utils_SGP_RecurringContribution::generateNextDate(
             $latest_contrib['values'][0]['receive_date'],
             $contribrecur_get['values'][0]['frequency_unit']);
 
-        Civi::log()->debug("Next payment date is {$next_date}");
+        Civi::log()->debug("RC {$recurring_contribution_id} - Next payment date is {$next_date}");
 
         $contribution_set_params = $contribrecur_get['values'][0];
         $contribution_set_params['next_sched_contribution'] = $next_date;
@@ -383,6 +385,7 @@
         $contribution_set_params['modified_date'] = $latest_contrib['values'][0]['receive_date'];
 
         try {
+
             $contribrecur_set = civicrm_api3('ContributionRecur', 'create', $contribution_set_params);
         }
 

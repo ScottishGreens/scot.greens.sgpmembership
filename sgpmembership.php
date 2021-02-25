@@ -89,8 +89,8 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
             $method_name = civicrm_api3('OptionValue', 'get', ['sequential' => 1,'return' => ["name"],'option_group_id.name' => "payment_instrument",'id' => $params->payment_instrument_id, ]);
 
-            if ($method_name['values'][0]'name'] == 'standing order' ||
-                $method_name['values'][0]'name'] == 'paypal order' ) {
+            if ($method_name['values'][0]['name'] == 'standing order' ||
+                $method_name['values'][0]['name'] == 'paypal order' ) {
 
                 // If this payment is paypal or standing order, process it
                 // Link this Contribution to a matching RC
@@ -119,11 +119,10 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
         if ($result['count'] > 0) {
 
-          // If the RC is Member Dues and Paypal or Standing Orders we continue
+          // If the RC is Member Dues and Paypal or Standing Orders update a linked membership
 
           Civi::log()->debug("Updating membership linked to Recurring ID {$id}");
 
-          // Update linked Membership
           $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($id);
 
         }
