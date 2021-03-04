@@ -211,19 +211,22 @@
         $recur_transaction_id_field = CRM_Utils_SGP_Contribution::getTransactionIDCustomField();
 
         // Fetch RC
-        $rc = civicrm_api3('ContributionRecur', 'get', array(
-            'id' => $recurring_contribution_id
+        $rc_current = civicrm_api3('ContributionRecur', 'get', array(
+            'sequential' => 1,
+            'id' => $recurring_contribution_id,
         ) );
 
-        // Frequency
-        $rc['values'][0]['frequency_unit'] 
+        Civi::log()->debug("RC {$recurring_contribution_id} {$rc_current['values'][0]['contact_id']} {$rc_current['values'][0]['trxn_id']}");
+
+        // Calc Frequency
+        $rc_current['values'][0]['frequency_unit'] 
             = CRM_Utils_SGP_RecurringContribution::calculateFrequency(
-                $rc['values'][0]['contact_id'], 
-                $rc['values'][0]['trxn_id'],
+                $rc_current['values'][0]['contact_id'], 
+                $rc_current['values'][0]['trxn_id'],
                 $recur_transaction_id_field);
 
-      // Set frequency
-        $rc = civicrm_api3('ContributionRecur', 'create', $rc['values'][0]);
+        // Set frequency
+        $rc = civicrm_api3('ContributionRecur', 'create', $rc_current['values'][0]);
 
     }
 
@@ -363,6 +366,14 @@
 
         Civi::log()->debug("Calculating frequency");
 
+
+        Civi::log()->debug("Determine Recurring Attributes: ", array('sequential' => 1,
+          'return' => ["receive_date",'contact_id','contribution_recur_id',"total_amount","financial_type_id", "payment_instrument_id", ],
+          'contact_id' => $contact_id,
+          'options' => ['limit' => 1000],
+          $recur_transaction_id_field => $transaction_id,));
+
+
         $contribs = civicrm_api3('Contribution', 'get', [
           'sequential' => 1,
           'return' => ["receive_date",'contact_id','contribution_recur_id',"total_amount","financial_type_id", "payment_instrument_id", ],
@@ -373,7 +384,7 @@
 
         // Get all Contributions with this Recurring Transaction ID
 
-        Civi::log()->debug("Determine Recurring Attributes: ", $contribs);
+        //Civi::log()->debug("Determine Recurring Attributes: ", $contribs);
 
         if (is_array($contribs) &&
             count($contribs) > 1) {

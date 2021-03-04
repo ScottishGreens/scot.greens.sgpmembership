@@ -12,7 +12,7 @@
 
     public function linkContributionToRC($contribution_id) {
 
-        $txn_custom_field = $this->getTransactionIDCustomField();
+        $txn_custom_field = CRM_Utils_SGP_Contribution::getTransactionIDCustomField();
 
         // Get Contribution
         Civi::log()->debug("Getting Contribution info");
