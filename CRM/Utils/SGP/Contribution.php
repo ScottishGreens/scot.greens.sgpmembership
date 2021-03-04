@@ -12,6 +12,8 @@
 
     public function linkContributionToRC($contribution_id) {
 
+        $txn_custom_field = $this->getTransactionIDCustomField();
+
         // Get Contribution
         Civi::log()->debug("Getting Contribution info");
         $contrib = civicrm_api3('Contribution', 'get', [
@@ -50,7 +52,7 @@
             }
 
             if (!isset($rc_transaction_id) || $rc_transaction_id == "") {
-                CRM_Core_Error::debug_log_message('No valid transaction id {$rc_transaction_id}');
+                CRM_Core_Error::debug_log_message("No valid transaction id {$rc_transaction_id}");
                 return;
             }
             
