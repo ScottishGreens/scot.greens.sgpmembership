@@ -22,7 +22,7 @@ class CRM_Contact_Form_Task_FixRecurringContributions extends CRM_Contact_Form_T
         'return' => 'id',
         'contact_id' => $contact_id,
         'financial_type_id' => "Member Dues",
-        'payment_instrument_id' => ["Paypal", "Standing Order"],
+        'payment_instrument_id' => ['IN' => ["Paypal", "Standing Order"]],
       ]);
 
       if ($recur['count'] < 1) {
