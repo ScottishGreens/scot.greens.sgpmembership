@@ -200,6 +200,34 @@
     }
 
 
+
+    // setFrequency()
+
+    public function setFrequency($recurring_contribution_id) {
+
+        Civi::log()->debug("RC {$recurring_contribution_id} - set Frequency");
+
+        // Get Recurring Transaction ID Custom Field
+        $recur_transaction_id_field = CRM_Utils_SGP_Contribution::getTransactionIDCustomField();
+
+        // Fetch RC
+        $rc = civicrm_api3('ContributionRecur', 'get', array(
+            'id' => $recurring_contribution_id
+        ) );
+
+        // Frequency
+        $rc['values'][0]['frequency_unit'] 
+            = CRM_Utils_SGP_RecurringContribution::calculateFrequency(
+                $rc['values'][0]['contact_id'], 
+                $rc['values'][0]['trxn_id'],
+                $recur_transaction_id_field);
+
+      // Set frequency
+        $rc = civicrm_api3('ContributionRecur', 'create', $rc['values'][0]);
+
+    }
+
+
     // removeUnmatchedPayments()
 
     // Find payments linked to this Rc that do not have the correct transaction ID and unlink them.
