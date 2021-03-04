@@ -18,9 +18,10 @@ class CRM_Contact_Form_Task_UpdateMemberships extends CRM_Contact_Form_Task {
       CRM_Core_Error::debug_log_message("Processing {$contact_id}");
       $mem = new CRM_Utils_SGP_Membership();
       $res[] = $mem->refreshAll($contact_id);
+      $res[] = $mem->setMembershipFields($contact_id);
 
     }
-    
+
     $this->assign('count', $count);
     $this->assign('rows', $res);
 
