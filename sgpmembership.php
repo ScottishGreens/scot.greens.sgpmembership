@@ -50,22 +50,9 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
       case 'ContributionRecur':
 
+        Civi::log()->debug("TRIGGER - NEW RECURRING CONTRIBUTION {$id}");
+
         CRM_Utils_SGP_RecurringContribution::setSource($id);
-
-    }
-
-  }
-
-  if($op == 'edit' || $op == 'create') {
-
-    switch ($objectName) {
-
-      case 'Membership':
-
-        $mem = new CRM_Utils_SGP_Membership();
-        $mem->setMembershipFields($params->contact_id);
-        break;
-
 
       //
       // PROCESS PAYPAL / SO MEMBERS DUES ON IMPORT OR MANUAL CREATION
@@ -90,7 +77,7 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
             if (strtolower($method_name['values'][0]['name']) == 'standing order' ||
                 strtolower($method_name['values'][0]['name']) == 'paypal' ) {
 
-                Civi::log()->debug("Processing Paypal or SO Members Dues");
+                Civi::log()->debug("TRIGGER - NEW MEMBERS DUES CONTRIBUTION {$id}");
 
                 // If this payment is paypal or standing order, process it
                 // Link this Contribution to a matching RC
@@ -108,6 +95,23 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
         break;
 
+    }
+
+  }
+
+  if($op == 'edit' || $op == 'create') {
+
+    switch ($objectName) {
+
+      case 'Membership':
+
+        Civi::log()->debug("TRIGGER - MEMBERSHIP SAVE {$id}");
+
+        $mem = new CRM_Utils_SGP_Membership();
+        $mem->setMembershipFields($params->contact_id);
+        break;
+
+
       case 'ContributionRecur':
       
         // Fetch the RC 
@@ -120,9 +124,9 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
 
         if ($result['count'] > 0) {
 
-          // If the RC is Member Dues and Paypal or Standing Orders update a linked membership
+          Civi::log()->debug("TRIGGER - PAYPAL/SO DUES CONTRIBUTION SAVE {$id}");
 
-          Civi::log()->debug("RC {$recurring_contribution_id} - Updating linked Membership");
+          // If the RC is Member Dues and Paypal or Standing Orders update a linked membership
 
           $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($id);
 
