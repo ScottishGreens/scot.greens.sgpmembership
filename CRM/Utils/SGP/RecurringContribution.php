@@ -338,7 +338,7 @@
           'financial_type_id' => "Member Dues",
         ]); 
 
-        if ($recur['count'] == 0) {
+        if ($recurr['count'] == 0) {
             Civi::log()->debug("No matching RCs ");
             return false;
         }
