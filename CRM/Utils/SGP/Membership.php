@@ -231,6 +231,8 @@
 
     public function refreshAll($contact_id) {
 
+      Civi::log()->debug("REFRESHING ALL MEMBERSHIPS FOR {$contact_id}");
+
       $memberships = civicrm_api3('Membership', 'get', [
         'sequential' => 1,
         'return' => 'id',
@@ -249,7 +251,7 @@
 
     public function refresh($membership_id) {
 
-        Civi::log()->debug("Membership {$membership_id} - Refresh");
+        Civi::log()->debug("REFRESHING MEMBERSHIP {$membership_id}");
 
         // Fetch Membership
         $membership = civicrm_api3('Membership', 'get', array(

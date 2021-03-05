@@ -430,7 +430,7 @@
 
     public function update($recurring_contribution_id) {
 
-        Civi::log()->debug("RC {$recurring_contribution_id} - Refresh");
+        Civi::log()->debug("UPDATING RECURRING CONTRIBUTION {$recurring_contribution_id}");
 
         // Fetch RC
         $contribrecur_get = civicrm_api3('ContributionRecur', 'get', array(
