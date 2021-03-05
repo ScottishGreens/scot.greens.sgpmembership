@@ -119,7 +119,7 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
           'sequential' => 1,
           'id' => $id,
           'financial_type_id' => "Member Dues",
-          'payment_instrument_id' => ["Paypal", "Standing Order"],
+          'payment_instrument_id' => ['IN' => ["Paypal", "Standing Order"]],
         ]);
 
         if ($result['count'] > 0) {
