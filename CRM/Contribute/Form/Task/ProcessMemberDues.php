@@ -21,7 +21,7 @@ class CRM_Contribute_Form_Task_ProcessMemberDues extends CRM_Contribute_Form_Tas
       Civi::log()->debug("Processing Contribution Member Dues {$contrib_id}");
       CRM_Utils_SGP_Contribution::linkContributionToRC($contrib_id);
 
-      $contrib = civicrm_api3('ContributionRecur', 'get', [
+      $contrib = civicrm_api3('Contribution', 'get', [
         'sequential' => 1,
         'return' => 'contact_id',
         'id' => $contrib_id,
