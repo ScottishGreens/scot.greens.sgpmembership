@@ -49,14 +49,19 @@
           'sequential' => 1,
           'skipStatusCal' => 0,
           'contact_id' => $recurr['contact_id'],
-          'join_date' => $recurr['start_date'],
+          'join_date' => $recurr['create_date'],
           'start_date' => $recurr['start_date'],
           'end_date' => $recurr['next_sched_contribution'],
           'is_test' => 0,
           'source' => "Membership Bot",
-          'contribution_recur_id' => $recurr['id'],
-          "membership_type_id"  => $membershiptype_id,
+          'status_id' => 2,
+          'is_override' => 0,
+          'is_pay_later' => 0,
+          'contribution_recur_id' => $recurring_contribution_id,
+          'membership_type_id'  => $membershiptype_id,
         );
+
+        CRM_Core_Error::debug_var("membership_params: ",$membership_params);
 
         $membership_result = civicrm_api3('Membership', 'create', $membership_params);
         
@@ -92,7 +97,7 @@
 
         $membership = civicrm_api3('Membership', 'get', $membership_params );
 
-        if ($membership['error'] || $membership['values'][0]['is_override'] == 1 ) {
+        if ($membership['error'] || $membership['count'] == 0  || $membership['values'][0]['is_override'] == 1 ) {
              Civi::log()->debug("No active membership");
             return false;
         }
@@ -133,12 +138,18 @@
         $membership_id = $mem->fetchMatching($recurring_contribution_id);
 
         if (is_numeric($membership_id)) {
+
+            Civi::log()->debug("Matching membership exists {$membership_id}");
+ 
             // If we find one, set the Recurring ID and update it
             $mem->setRecurringID($membership_id, $recurring_contribution_id);
             $mem->refresh($membership_id);
 
         }
         else {
+
+            Civi::log()->debug("Creating membership for {$recurring_contribution_id}");
+
             // else, generate Linked Membership
             $mem->generate($recurring_contribution_id);
         }
