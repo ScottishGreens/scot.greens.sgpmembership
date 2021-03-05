@@ -2,22 +2,6 @@
 
   class CRM_Utils_SGP_Membership {
 
-    var $contact_id = NULL;
-    var $total_amount = NULL;
-    var $financial_type_id = NULL;
-    var $payment_instrument_id = NULL;
-    var $contribution_id = NULL;
-    var $processor_id = NULL;
-    var $receive_date = NULL;
-    var $membership_id = NULL;
-    var $membership_type_id = NULL;
-    var $frequency_unit = NULL;
-    var $recurring_contribution_id = NULL;
-    var $recurring_contribution_start = NULL;
-    var $recurring_contribution_end = NULL;
-    var $recurring_contribution_next = NULL;
-    var $tempgroup_id = NULL;
-
     /**
      * @param array $params
      */
@@ -37,7 +21,7 @@
         $recurr = $contribrecur_get['values'][0];
 
         // Fetch Membership Type
-        $membershiptype_id = $this->fetchMembershipType($recurr);
+        $membershiptype_id = CRM_Utils_SGP_Membership::fetchMembershipType($recurr);
 
         if (!isset($membershiptype_id)) {
             Civi::log()->debug("No Membership Type");
@@ -73,7 +57,7 @@
         Civi::log()->debug("Fetch Matching Membershp for RC {$recurring_contribution_id} and Transaction ID {$transaction_id}");
 
         // Get Recurring Transaction ID Custom Field
-        $transaction_id_field = $this->getTransactionIDCustomField();
+        $transaction_id_field = CRM_Utils_SGP_Membership::getTransactionIDCustomField();
 
         if (!isset($transaction_id_field)) {
             return;
@@ -134,16 +118,15 @@
     public function fixMissingMembership($recurring_contribution_id) {
 
         // Fetch similar Membership
-        $mem = new CRM_Utils_SGP_Membership();
-        $membership_id = $mem->fetchMatching($recurring_contribution_id);
+        $membership_id = CRM_Utils_SGP_Membership::fetchMatching($recurring_contribution_id);
 
         if (is_numeric($membership_id)) {
 
             Civi::log()->debug("Matching membership exists {$membership_id}");
  
             // If we find one, set the Recurring ID and update it
-            $mem->setRecurringID($membership_id, $recurring_contribution_id);
-            $mem->refresh($membership_id);
+            CRM_Utils_SGP_Membership::setRecurringID($membership_id, $recurring_contribution_id);
+            CRM_Utils_SGP_Membership::refresh($membership_id);
 
         }
         else {
@@ -151,7 +134,7 @@
             Civi::log()->debug("Creating membership for {$recurring_contribution_id}");
 
             // else, generate Linked Membership
-            $mem->generate($recurring_contribution_id);
+            CRM_Utils_SGP_Membership::generate($recurring_contribution_id);
         }
 
     }
@@ -205,7 +188,7 @@
             Civi::log()->debug("Updating membership type to {$contribrecur_get['values'][0]['frequency_unit']}");
 
             // Fetch Membership Type
-            $membershiptype_id = $this->fetchMembershipType($contribrecur_get['values'][0]);
+            $membershiptype_id = CRM_Utils_SGP_Membership::fetchMembershipType($contribrecur_get['values'][0]);
 
             // Update Membership
             $membership_params = $membership_get['values'][0];
@@ -256,7 +239,7 @@
 
       foreach ($memberships['values'] as $m) {
        CRM_Core_Error::debug_log_message("Processing {$contact_id} Membership {$m['id']}");
-        $res[] = $this->refresh($m['id']);
+        $res[] = CRM_Utils_SGP_Membership::refresh($m['id']);
       }
 
       return $res;
@@ -374,7 +357,7 @@
 
         Civi::log()->debug("Setting Membership Fields for {$contact_id}");
 
-        $custom_fields = $this->getMembershipCustomFields();
+        $custom_fields = CRM_Utils_SGP_Membership::getMembershipCustomFields();
 
         $update_params = array(
           'sequential' => 1,
@@ -387,16 +370,16 @@
         $update_params[$custom_fields['memberstatus']] = '';
 
 
-        $membership_optionvalues = $this->getMembershipStatuses();
+        $membership_optionvalues = CRM_Utils_SGP_Membership::getMembershipStatuses();
 
         // GET FIRST MEMBERSHIP FOR START DATE
-        $first_membership = $this->getFirstMembership($contact_id);
+        $first_membership = CRM_Utils_SGP_Membership::getFirstMembership($contact_id);
 
         if (is_numeric($first_membership['id']))
           $update_params[$custom_fields['memberjoin']] = $first_membership['join_date'];
 
         // GET LAST MEMBERSHIP FOR STATUS AND END DATE
-        $last_membership = $this->getLastMembership($contact_id);
+        $last_membership = CRM_Utils_SGP_Membership::getLastMembership($contact_id);
 
         if (isset($last_membership['id']) &&
           is_numeric($last_membership['id'])) {
@@ -423,15 +406,15 @@
 
         // GET LAST MEMBER DUES PAYMENT FOR METHOD
 
-        $this->membership_payment_method = $this->getMembershipPaymentMethod($contact_id);
+        $membership_payment_method = CRM_Utils_SGP_Membership::getMembershipPaymentMethod($contact_id);
 
-        if (isset($this->membership_payment_method) &&
-              $this->membership_payment_method !== FALSE ) {
+        if (isset($membership_payment_method) &&
+              $membership_payment_method !== FALSE ) {
 
-          if (strtolower($this->membership_payment_method) == 'electronic direct debit')
-            $this->membership_payment_method = 'direct debit';
+          if (strtolower($membership_payment_method) == 'electronic direct debit')
+            $membership_payment_method = 'direct debit';
 
-          $update_params[$custom_fields['membershippaymentmethod']] = $this->membership_payment_method;
+          $update_params[$custom_fields['membershippaymentmethod']] = $membership_payment_method;
 
         }
 

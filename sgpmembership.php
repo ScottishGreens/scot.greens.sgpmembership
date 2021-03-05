@@ -74,23 +74,23 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
       case 'Contribution':
 
         // Check not a test payment and status is completed
-        if ($params->is_test != 0 &&
+        if ($params->is_test !== 0 &&
             $params->contribution_status_id == 1) {
-
 
           // Get Member Dues financial type
           $ft_memberdues = civicrm_api3('FinancialType', 'get', ['sequential' => 1,'return' => ["name"],'id' => $params->financial_type_id, ]);
 
-          if (!$ft_memberdues['values'][0]['name'] == 'Member Dues') {
-              return;
+          if ($ft_memberdues['values'][0]['name'] !== 'Member Dues') {
+            Civi::log()->debug("Not Member Dues");
+            return;
           }
 
-          if ($params->financial_type_id == $ft_memberdues['id']) {
+            $method_name = civicrm_api3('OptionValue', 'get', ['sequential' => 1,'return' => ["name"],'option_group_id.name' => "payment_instrument",'value' => $params->payment_instrument_id, ]);
 
-            $method_name = civicrm_api3('OptionValue', 'get', ['sequential' => 1,'return' => ["name"],'option_group_id.name' => "payment_instrument",'id' => $params->payment_instrument_id, ]);
+            if (strtolower($method_name['values'][0]['name']) == 'standing order' ||
+                strtolower($method_name['values'][0]['name']) == 'paypal' ) {
 
-            if ($method_name['values'][0]['name'] == 'standing order' ||
-                $method_name['values'][0]['name'] == 'paypal order' ) {
+                Civi::log()->debug("Processing Paypal or SO Members Dues");
 
                 // If this payment is paypal or standing order, process it
                 // Link this Contribution to a matching RC
@@ -100,8 +100,9 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
                 CRM_Utils_SGP_Membership::refreshAll($contact_id);
 
             }
-
-          }
+            else {
+              Civi::log()->debug("Payment Method is {$method_name['values'][0]['name']} (ID: {$params->payment_instrument_id}) so will not be processed");
+            }
 
         }
 
