@@ -82,9 +82,9 @@ function sgpmembership_civicrm_post($op, $objectName, $id, &$params) {
                 // If this payment is paypal or standing order, process it
                 // Link this Contribution to a matching RC
                 CRM_Utils_SGP_Contribution::linkContributionToRC($id);
-                
+
                 // Refresh all Memberships for this contact
-                CRM_Utils_SGP_Membership::refreshAll($contact_id);
+                CRM_Utils_SGP_Membership::refreshAll($params->contact_id);
 
             }
             else {
