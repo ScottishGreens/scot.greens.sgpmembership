@@ -278,6 +278,10 @@
 
           return true;
 
+          // If it is a Direct Debit membership we need to refresh the Membership end date.
+
+          $mem = CRM_Utils_SGP_Membership::updateEndDateFromRC($membership['values'][0]['contribution_recur_id']);
+
         }
         else {  
 
