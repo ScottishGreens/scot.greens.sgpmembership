@@ -405,9 +405,9 @@
             if (!$date_obj) $date_obj = date_create_from_format('Y-m-d', $last_membership['end_date']);
             if (!$date_obj) $date_obj = date_create_from_format('Y-m-d H:i:s', $last_membership['end_date']);
             $expiry_date_obj = date_modify($date_obj,'+3 months');
-
-            $update_params[$custom_fields['memberexpiry']] = $expiry_date_obj->format('Y-m-d');
-
+            if ($expiry_date_obj !== FALSE) {
+              $update_params[$custom_fields['memberexpiry']] = $expiry_date_obj->format('Y-m-d');
+            }
 
         } 
 
